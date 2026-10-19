@@ -14,8 +14,8 @@
   --accent-ice: #bae6fd;
   --accent-glow: rgba(56, 189, 248, 0.4);
   --text-primary: #f8fafc;
-  --text-secondary: rgba(248, 250, 252, 0.72);
-  --text-muted: rgba(248, 250, 252, 0.45);
+  --text-secondary: rgba(248, 250, 252, 0.75);
+  --text-muted: rgba(248, 250, 252, 0.48);
 
   /* Glassmorphism Design Tokens */
   --glass-bg: rgba(14, 25, 48, 0.55);
@@ -124,7 +124,7 @@ button {
 }
 
 /* ==========================================================================
-   FIXED VIDEO STAGE (Synchronized with movement)
+   CANVAS STAGE VIEWPORT (60fps Canvas Architecture)
    ========================================================================== */
 .stage-viewport {
   position: fixed;
@@ -141,36 +141,23 @@ button {
   background-color: #000000;
 }
 
-#hero-video {
+#hero-canvas {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   will-change: transform;
 }
 
-/* Mobile & Tablet video framing */
-@media (max-width: 768px) {
-  #hero-video {
-    object-position: center 32%;
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  #hero-video {
-    object-position: 55% center;
-  }
-}
-
-/* Ambient Vignette & Smooth Contrast Overlay */
+/* Subtle Vignette */
 .stage-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(4, 8, 20, 0.65) 100%);
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(4, 8, 20, 0.6) 100%);
 }
 
 /* ==========================================================================
@@ -305,10 +292,10 @@ button {
   position: fixed;
   top: 18px;
   right: 18px;
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  background: rgba(14, 25, 48, 0.7);
+  background: rgba(14, 25, 48, 0.75);
   border: 1px solid var(--glass-border);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -330,7 +317,7 @@ button {
 .mobile-nav-drawer {
   position: fixed;
   inset: 0;
-  background: rgba(4, 8, 20, 0.94);
+  background: rgba(4, 8, 20, 0.95);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   z-index: 99;
@@ -350,7 +337,7 @@ button {
 }
 
 .mobile-nav-drawer a {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 500;
   color: var(--text-primary);
   transition: color 0.2s;
@@ -376,10 +363,9 @@ button {
   position: relative;
   width: 100%;
   z-index: 10;
-  pointer-events: none; /* Let clicks pass to interactive cards */
+  pointer-events: none;
 }
 
-/* Each major scroll section takes full viewport */
 .scene-section {
   position: relative;
   min-height: 100vh;
@@ -398,7 +384,6 @@ button {
   pointer-events: auto;
 }
 
-/* Subtle corner label */
 .scene-indicator {
   position: absolute;
   right: 5%;
@@ -413,7 +398,7 @@ button {
 }
 
 /* ==========================================================================
-   SECTION 1: HERO (Simanto on Left, Content on Right)
+   SECTION 1: HERO
    ========================================================================== */
 .hero-scene {
   justify-content: flex-end;
@@ -446,6 +431,7 @@ button {
   width: 24px;
   height: 1.5px;
   background: var(--accent-cyan);
+  flex-shrink: 0;
 }
 
 .hero-name-wrapper {
@@ -530,12 +516,18 @@ button {
 }
 
 .pill-icon {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   color: var(--accent-cyan);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+}
+
+.pill-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 /* As Featured In Strip */
@@ -586,7 +578,7 @@ button {
 }
 
 /* ==========================================================================
-   SECTION 2: AT A GLANCE (Simanto on Right, 4 Cards on Left)
+   SECTION 2: AT A GLANCE
    ========================================================================== */
 .glance-scene {
   justify-content: flex-start;
@@ -610,7 +602,6 @@ button {
   color: #ffffff;
 }
 
-/* Cards Fan-out Container */
 .cards-deck {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -656,7 +647,6 @@ button {
 .deck-card.floating:nth-child(3) { animation: cardFloat3 5.8s ease-in-out infinite 0.8s; }
 .deck-card.floating:nth-child(4) { animation: cardFloat4 6.5s ease-in-out infinite 1.2s; }
 
-/* Interactive Hover State: Lifts, straightens and glows */
 .deck-card:hover {
   animation: none !important;
   transform: rotate(0deg) translateY(-18px) scale(1.03) !important;
@@ -740,7 +730,7 @@ button {
 }
 
 /* ==========================================================================
-   SECTION 3: STORY (Simanto on Left/Center, Text on Right)
+   SECTION 3: STORY
    ========================================================================== */
 .story-scene {
   justify-content: flex-end;
@@ -755,7 +745,6 @@ button {
   gap: 36px;
 }
 
-/* Vertical glowing progress bar */
 .story-progress-rail {
   width: 3px;
   height: 380px;
@@ -819,7 +808,7 @@ button {
 }
 
 /* ==========================================================================
-   SECTION 4: PULL UP A CHAIR (Simanto Left with Mug, Form on Right)
+   SECTION 4: PULL UP A CHAIR
    ========================================================================== */
 .chair-scene {
   justify-content: flex-end;
@@ -855,14 +844,12 @@ button {
   color: var(--text-secondary);
 }
 
-/* The Coffee Mug Glass Booking Form */
 .mug-form-wrapper {
   position: relative;
   margin-top: 10px;
   max-width: 500px;
 }
 
-/* Animated SVG Steam on Rim */
 .steam-emitter {
   position: absolute;
   top: -46px;
@@ -910,7 +897,6 @@ button {
   }
 }
 
-/* Mug Body Shape (Curved bottom corners) */
 .mug-body {
   position: relative;
   padding: 30px 28px 32px 28px;
@@ -932,7 +918,6 @@ button {
   box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.28);
 }
 
-/* Mug Glass Curved Handle on Right */
 .mug-handle {
   position: absolute;
   top: 45px;
@@ -1039,7 +1024,7 @@ button {
 }
 
 /* ==========================================================================
-   SECTION 5: FOOTER (Black-Blue Shadow Rise & Connect Panel)
+   SECTION 5: FOOTER
    ========================================================================== */
 .footer-section {
   position: relative;
@@ -1188,7 +1173,8 @@ button {
 }
 
 /* ==========================================================================
-   RESPONSIVE OPTIMIZATIONS (Tablet, Galaxy A32 & Mobile)
+   MOBILE & TABLET OPTIMIZATIONS (<768px)
+   Without modifying Desktop Layout
    ========================================================================== */
 @media (max-width: 1080px) {
   .cards-deck {
@@ -1211,9 +1197,12 @@ button {
 }
 
 @media (max-width: 768px) {
+  /* 1. Mobile Sections Placement & Readability Dark Gradient */
   .scene-section {
-    padding: 80px 6% 40px 6%;
-    align-items: flex-end; /* On mobile, place content naturally over dark background */
+    padding: 100px 5% 48px 5%;
+    align-items: flex-end;
+    /* Rich bottom dark gradient so text remains 100% crisp and readable */
+    background: linear-gradient(180deg, transparent 0%, rgba(4, 8, 20, 0.35) 45%, rgba(4, 8, 20, 0.88) 75%, #040814 100%);
   }
 
   .hero-scene, .glance-scene, .story-scene, .chair-scene {
@@ -1225,27 +1214,98 @@ button {
     margin: 0;
   }
 
+  /* 3. Mobile Eyebrow kept on ONE LINE */
+  .eyebrow {
+    font-size: 0.58rem !important;
+    letter-spacing: 0.08em !important;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .eyebrow::before {
+    width: 14px;
+    margin-right: 4px;
+  }
+
   .hero-name-serif {
-    font-size: clamp(3.2rem, 15vw, 5rem);
+    font-size: clamp(3.2rem, 15vw, 4.8rem);
   }
 
   .hero-name-outline {
-    font-size: clamp(1.8rem, 8vw, 2.8rem);
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
   }
 
-  .cards-deck {
-    grid-template-columns: 1fr;
+  .hero-tagline {
+    font-size: 1.05rem;
   }
 
-  .featured-strip {
+  .hero-pills {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
+  }
+
+  .glass-pill {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 9px 14px;
+    font-size: 0.78rem;
+  }
+
+  /* 4. Mobile Auto-Marquee for "As Featured In" Strip */
+  .featured-strip {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px 14px;
+    overflow: hidden;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .featured-label {
+    font-size: 0.56rem;
+    flex-shrink: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    padding-right: 10px;
   }
 
   .featured-outlets {
-    flex-wrap: wrap;
-    gap: 14px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .marquee-track {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    animation: marqueeScroll 12s linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes marqueeScroll {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .outlet-item {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  /* Cards deck on mobile */
+  .cards-deck {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .deck-card {
+    min-height: auto;
+    padding: 20px 18px;
   }
 
   .story-progress-rail {
@@ -1253,15 +1313,20 @@ button {
   }
 
   .mug-handle {
-    display: none; /* Keep form sleek on narrow phone screens */
+    display: none;
   }
 
   .mug-form-wrapper {
     max-width: 100%;
   }
 
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
   .footer-panel {
-    padding: 30px 24px;
+    padding: 28px 20px;
   }
 }
 
@@ -1276,5 +1341,8 @@ button {
   .deck-card {
     animation: none !important;
     transform: none !important;
+  }
+  .marquee-track {
+    animation: none !important;
   }
 }
