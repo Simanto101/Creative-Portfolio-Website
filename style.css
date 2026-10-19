@@ -228,8 +228,21 @@ button {
   list-style: none;
 }
 
+/* Nav link icons & tooltip behavior */
+.nav-icon {
+  display: none;
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
 .nav-link {
-  display: block;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 16px;
   font-size: 0.85rem;
   font-weight: 500;
@@ -260,6 +273,7 @@ button {
   box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
   transition: all 0.3s var(--ease-out-expo);
   white-space: nowrap;
+  position: relative;
 }
 
 .nav-cta:hover {
@@ -275,44 +289,138 @@ button {
   fill: currentColor;
 }
 
-/* Nav Morphed to Vertical Left Panel on Scroll */
+/* Nav Morphed to Vertical Left Panel on Scroll: Ultra-compact, Icon-only with hover labels & generous gutter so text is never covered */
 .nav-wrapper.morphed {
   top: 50%;
-  left: 28px;
+  left: 22px;
   transform: translateY(-50%);
+  z-index: 100;
 }
 
 .nav-wrapper.morphed .glass-nav {
   flex-direction: column;
-  padding: 16px 10px;
-  border-radius: 28px;
-  gap: 12px;
+  padding: 12px 7px;
+  border-radius: 9999px;
+  gap: 10px;
+  width: 48px;
+  align-items: center;
 }
 
 .nav-wrapper.morphed .nav-links {
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
+  width: 100%;
+  align-items: center;
+}
+
+.nav-wrapper.morphed .nav-icon {
+  display: block;
 }
 
 .nav-wrapper.morphed .nav-link {
-  padding: 8px 14px;
-  font-size: 0.8rem;
-  text-align: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  position: relative;
+}
+
+.nav-wrapper.morphed .nav-link .nav-text {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-8px);
+  padding: 6px 12px;
+  background: rgba(8, 16, 32, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 110;
+}
+
+.nav-wrapper.morphed .nav-link .nav-text::before {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent rgba(255, 255, 255, 0.18) transparent transparent;
+}
+
+.nav-wrapper.morphed .nav-link:hover .nav-text {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
 }
 
 .nav-wrapper.morphed .nav-cta {
   margin-left: 0;
   margin-top: 4px;
-  padding: 8px 12px;
-  font-size: 0.78rem;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  position: relative;
 }
 
 .nav-wrapper.morphed .nav-cta span.cta-full {
-  display: none;
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-8px);
+  padding: 6px 12px;
+  background: rgba(8, 16, 32, 0.92);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 110;
+  display: block;
+}
+
+.nav-wrapper.morphed .nav-cta span.cta-full::before {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent rgba(56, 189, 248, 0.4) transparent transparent;
+}
+
+.nav-wrapper.morphed .nav-cta:hover span.cta-full {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
 }
 
 .nav-wrapper.morphed .nav-cta span.cta-short {
-  display: inline;
+  display: none;
 }
 
 .nav-cta span.cta-short {
@@ -417,17 +525,9 @@ button {
   pointer-events: auto;
 }
 
+/* Scene Indicator Removed */
 .scene-indicator {
-  position: absolute;
-  right: 5%;
-  bottom: 28px;
-  font-family: var(--font-display);
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.25em;
-  color: rgba(255, 255, 255, 0.25);
-  pointer-events: none;
-  text-transform: uppercase;
+  display: none !important;
 }
 
 /* ==========================================================================
@@ -449,22 +549,21 @@ button {
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
   font-family: var(--font-sans);
-  font-size: 0.76rem;
+  font-size: 0.88rem;
   font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--accent-cyan);
+  text-transform: none;
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
 }
 
-.eyebrow::before {
-  content: "";
-  display: inline-block;
-  width: 24px;
-  height: 1.5px;
-  background: var(--accent-cyan);
-  flex-shrink: 0;
+.eyebrow::before, .eyebrow::after {
+  display: none !important;
+  content: none !important;
 }
 
 .hero-name-wrapper {
@@ -506,12 +605,14 @@ button {
   max-width: 540px;
 }
 
+.hero-tagline .highlight-bold,
 .hero-tagline em {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 1.25em;
+  font-family: inherit;
+  font-style: normal;
+  font-weight: 600;
   color: #ffffff;
-  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
 }
 
 .hero-pills {
@@ -641,6 +742,7 @@ button {
   width: 100%;
   max-width: 680px;
   margin-right: auto;
+  margin-left: 54px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -1565,15 +1667,21 @@ body.menu-open { overflow: hidden; }
   }
 
   .eyebrow {
-    font-size: clamp(9px, 2.6vw, 11px);
-    letter-spacing: 0.14em;
-    white-space: nowrap;
-    flex-wrap: nowrap;
-    gap: 8px;
+    font-size: 11.5px !important;
+    letter-spacing: 0.05em !important;
+    white-space: normal !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    text-transform: none !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
   }
 
-  .eyebrow::before {
-    width: 16px;
+  .eyebrow::before, .eyebrow::after {
+    display: none !important;
+    content: none !important;
   }
 
   .hero-name-wrapper {
@@ -1597,6 +1705,20 @@ body.menu-open { overflow: hidden; }
     font-size: 15.5px;
     line-height: 1.45;
     max-width: 100%;
+  }
+
+  .hero-tagline .highlight-bold,
+  .hero-tagline em {
+    font-family: inherit !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    text-shadow: 0 0 14px rgba(56, 189, 248, 0.4) !important;
+  }
+
+  .glance-content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 
   .hero-pills {

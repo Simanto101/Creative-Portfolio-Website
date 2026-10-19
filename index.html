@@ -114,12 +114,42 @@
   <div class="nav-wrapper" id="nav-wrapper">
     <nav class="glass-nav" aria-label="Main Navigation">
       <ul class="nav-links">
-        <li><a href="#hero" class="nav-link active">Home</a></li>
-        <li><a href="#glance-section" class="nav-link">About</a></li>
-        <li><a href="#card-neuroparsec" class="nav-link">NeuroParsec</a></li>
-        <li><a href="#card-ccb" class="nav-link">CCB</a></li>
-        <li><a href="#card-leadership" class="nav-link">Leadership</a></li>
-        <li><a href="#card-playground" class="nav-link">Playground</a></li>
+        <li>
+          <a href="#hero" class="nav-link active" data-label="Home">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span class="nav-text">Home</span>
+          </a>
+        </li>
+        <li>
+          <a href="#glance-section" class="nav-link" data-label="About">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span class="nav-text">About</span>
+          </a>
+        </li>
+        <li>
+          <a href="#card-neuroparsec" class="nav-link" data-label="NeuroParsec">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+            <span class="nav-text">NeuroParsec</span>
+          </a>
+        </li>
+        <li>
+          <a href="#card-ccb" class="nav-link" data-label="CCB">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <span class="nav-text">CCB</span>
+          </a>
+        </li>
+        <li>
+          <a href="#card-leadership" class="nav-link" data-label="Leadership">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path></svg>
+            <span class="nav-text">Leadership</span>
+          </a>
+        </li>
+        <li>
+          <a href="#card-playground" class="nav-link" data-label="Playground">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31L4.08 19.16A2 2 0 0 0 5.8 22h12.4a2 2 0 0 0 1.72-2.84L14 9.31V2"></path><path d="M8.5 2h7"></path></svg>
+            <span class="nav-text">Playground</span>
+          </a>
+        </li>
       </ul>
       <a href="#chair-section" class="nav-cta" aria-label="Reserve a seat">
         <svg viewBox="0 0 24 24"><path d="M18.5 3H6c-1.1 0-2 .9-2 2v10c0 3.31 2.69 6 6 6h2c3.31 0 6-2.69 6-6V5c0-1.1-.9-2-2-2zm-2 2v3h-4V5h4zm-6 0v3H6V5h4.5zm7.5 10c0 2.21-1.79 4-4 4h-2c-2.21 0-4-1.79-4-4v-5h10v5zM20 7v5c0 1.1-.9 2-2 2h-1v-2h1V7h-1V5h1c1.1 0 2 .9 2 2z"/></svg>
@@ -144,7 +174,7 @@
     <section class="scene-section hero-scene" id="hero">
       <div class="scene-inner">
         <div class="hero-content">
-          <div class="eyebrow">TECHNOLOGIST · FOUNDER · YOUTH LEADER</div>
+          <div class="eyebrow">Building what's next in care.</div>
 
           <div class="hero-name-wrapper">
             <h1 class="hero-name-serif is-split"><span class="sr-only">Simanto</span><span class="char-mask" aria-hidden="true"><span class="char" style="--i:0">S</span></span><span class="char-mask" aria-hidden="true"><span class="char" style="--i:1">i</span></span><span class="char-mask" aria-hidden="true"><span class="char" style="--i:2">m</span></span><span class="char-mask" aria-hidden="true"><span class="char" style="--i:3">a</span></span><span class="char-mask" aria-hidden="true"><span class="char" style="--i:4">n</span></span><span class="char-mask" aria-hidden="true"><span class="char" style="--i:5">t</span></span><span class="char-mask" aria-hidden="true"><span class="char" style="--i:6">o</span></span></h1>
@@ -152,7 +182,7 @@
           </div>
 
           <p class="hero-tagline">
-            I use AI to solve real problems, and I'm on a mission to <em>transform healthcare.</em>
+            I use AI to solve real problems, and I'm on a mission to <span class="highlight-bold">transform healthcare.</span>
           </p>
 
           <div class="hero-pills">
@@ -172,7 +202,7 @@
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                 </svg>
               </span>
-              <span>Founder & President, Cancer CARE Bangladesh</span>
+              <span>Founder & President, Cancer CARE Bangladesh (CCB)</span>
             </a>
           </div>
 
@@ -193,7 +223,6 @@
           </div>
         </div>
       </div>
-      <div class="scene-indicator">01 / HERO</div>
     </section>
 
     <!-- ====================================================================
@@ -285,7 +314,6 @@
           </div>
         </div>
       </div>
-      <div class="scene-indicator">02 / AT A GLANCE (WHERE THE MAGIC HAPPENS)</div>
     </section>
 
     <!-- ====================================================================
@@ -313,7 +341,6 @@
 
         </div>
       </div>
-      <div class="scene-indicator">03 / STORY (FIND OUT HOW AND THEN WHY IT MATTERS)</div>
     </section>
 
     <!-- ====================================================================
@@ -387,7 +414,6 @@
 
         </div>
       </div>
-      <div class="scene-indicator">04 / PULL UP A CHAIR</div>
     </section>
 
   </main>
