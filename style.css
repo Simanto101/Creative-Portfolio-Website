@@ -1229,55 +1229,63 @@ button {
 }
 
 @media (max-width: 768px) {
-  /* 1. Mobile Sections Placement & Full Canvas Character Visibility */
+  /* 1. Mobile Sections: Content in bottom ~45%, top ~55% clear for Simanto */
   .scene-section {
-    padding: 80px 4.5% 40px 4.5% !important;
+    padding: 0 18px 24px 18px !important;
     min-height: 100vh !important;
     min-height: 100dvh !important;
     display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: transparent !important; /* Keep character visible, no blackouts */
+    flex-direction: column !important;
+    justify-content: flex-end !important; /* Bottom ~45% */
+    align-items: stretch !important;
+    /* Smooth dark gradient: 0-48% transparent (face/shoulders), fades to #060b18 at 85% */
+    background: linear-gradient(180deg, transparent 0%, transparent 48%, rgba(6, 11, 24, 0.40) 62%, rgba(6, 11, 24, 0.85) 85%, #060b18 100%) !important;
+    box-sizing: border-box !important;
+    position: relative !important;
   }
 
   .scene-inner {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
     padding: 0 !important;
   }
 
-  /* 2. Glassmorphic Readable Content Panels (Protects character visibility behind) */
+  /* 2. No Card Backgrounds on Mobile - Content sits cleanly over the smooth gradient */
   .hero-content, .story-content, .chair-content {
-    background: rgba(6, 11, 24, 0.70) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
-    border-radius: 22px !important;
-    padding: 24px 18px !important;
-    box-shadow: 0 16px 45px -10px rgba(0, 0, 0, 0.85) !important;
+    background: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
     box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
   }
 
   .glance-content {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
+    padding: 0 !important;
   }
 
-  /* 3. Eyebrow: Responsive, No ellipsis cut-off */
+  /* 3. Eyebrow */
   .eyebrow {
-    font-size: clamp(0.64rem, 2.8vw, 0.74rem) !important;
-    letter-spacing: 0.1em !important;
+    font-size: 11px !important;
+    letter-spacing: 0.12em !important;
     white-space: normal !important;
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
     gap: 6px !important;
-    line-height: 1.4 !important;
+    line-height: 1.35 !important;
+    margin-bottom: 2px !important;
   }
 
   .eyebrow::before {
@@ -1285,157 +1293,260 @@ button {
     margin-right: 2px !important;
   }
 
-  /* 4. Hero Name & Typography */
+  /* 4. Exact Requested Hero Typography Sizes: "Simanto" 56px, "MITRO" 30px, headline 16px */
+  .hero-name-wrapper {
+    margin: 2px 0 !important;
+  }
+
   .hero-name-serif {
-    font-size: clamp(2.8rem, 13vw, 4.2rem) !important;
-    line-height: 0.95 !important;
+    font-size: 56px !important;
+    line-height: 0.92 !important;
+    letter-spacing: -0.01em !important;
   }
 
   .hero-name-outline {
-    font-size: clamp(1.6rem, 7.5vw, 2.4rem) !important;
+    font-size: 30px !important;
     line-height: 0.95 !important;
+    letter-spacing: 0.08em !important;
+    margin-top: 1px !important;
   }
 
   .hero-tagline {
-    font-size: clamp(0.92rem, 3.8vw, 1.05rem) !important;
-    line-height: 1.55 !important;
+    font-size: 16px !important;
+    line-height: 1.45 !important;
+    margin: 4px 0 6px 0 !important;
+    color: var(--text-secondary) !important;
   }
 
-  /* 5. Hero Pills (Clean Full Width, No Text Overflow) */
+  /* 5. Hero Pills: Compact in one row if they fit, otherwise stacked small */
   .hero-pills {
     display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
     width: 100% !important;
+    margin-top: 2px !important;
   }
 
   .glass-pill {
-    width: 100% !important;
-    justify-content: flex-start !important;
-    padding: 10px 14px !important;
-    font-size: 0.78rem !important;
-    white-space: normal !important;
-    line-height: 1.35 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 6px 11px !important;
+    font-size: 11px !important;
+    gap: 6px !important;
+    border-radius: 999px !important;
+    white-space: nowrap !important;
+    flex: 1 1 auto !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
   }
 
-  /* 6. As Featured In Strip with Infinite Marquee */
+  .pill-icon {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  /* 6. As Featured In Strip: Full first name visible, fade masks on both edges */
   .featured-strip {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 10px 12px !important;
-    overflow: hidden !important;
+    padding: 7px 10px !important;
+    margin-top: 6px !important;
+    display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 12px !important;
+    gap: 10px !important;
+    background: rgba(14, 25, 48, 0.45) !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
   }
 
   .featured-label {
-    font-size: 0.58rem !important;
+    font-size: 8.5px !important;
+    letter-spacing: 0.12em !important;
     flex-shrink: 0 !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.14) !important;
-    padding-right: 10px !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+    padding-right: 8px !important;
   }
 
   .featured-outlets {
     display: flex !important;
     align-items: center !important;
-    gap: 28px !important;
     flex: 1 !important;
     overflow: hidden !important;
-    white-space: nowrap !important;
+    position: relative !important;
+    /* Soft fade masks on both left and right edges */
+    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%) !important;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%) !important;
   }
 
   .marquee-track {
     display: flex !important;
     align-items: center !important;
-    gap: 28px !important;
-    animation: marqueeScroll 12s linear infinite !important;
+    gap: 24px !important;
+    padding-left: 10px !important; /* Starts fully visible, no cut-off 'hom Alo' */
+    animation: marqueeScroll 14s linear infinite !important;
     will-change: transform;
+    white-space: nowrap !important;
   }
 
   @keyframes marqueeScroll {
-    0% { transform: translateX(0%); }
+    0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
 
   .outlet-item {
-    font-size: 0.8rem !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
     flex-shrink: 0 !important;
   }
 
-  /* 7. Section 2 Cards: Clean Single Column, No Tilts/Overlaps */
+  /* 7. Section 2 (At a Glance): Horizontal Swipeable Fan/Carousel in Bottom Area */
+  .glance-scene {
+    justify-content: flex-end !important;
+    padding-bottom: 22px !important;
+  }
+
+  .scene-title {
+    font-size: 24px !important;
+    margin-bottom: 4px !important;
+  }
+
   .cards-deck {
-    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
     gap: 12px !important;
+    padding: 6px 2px 14px 2px !important;
+    margin-top: 8px !important;
     width: 100% !important;
-    margin-top: 20px !important;
+    scrollbar-width: none !important;
+  }
+  .cards-deck::-webkit-scrollbar {
+    display: none !important;
   }
 
   .deck-card {
-    min-height: auto !important;
-    padding: 20px 18px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    flex: 0 0 78% !important;
+    max-width: 80% !important;
+    scroll-snap-align: start !important;
+    min-height: 175px !important;
+    padding: 16px 14px !important;
+    background: rgba(14, 25, 48, 0.72) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    box-shadow: 0 10px 25px -6px rgba(0, 0, 0, 0.6) !important;
     transform: none !important;
     animation: none !important;
+    box-sizing: border-box !important;
   }
 
-  /* 8. Section 3 Story */
+  .deck-card .card-top {
+    margin-bottom: 8px !important;
+  }
+  .deck-card .card-title {
+    font-size: 16px !important;
+    margin-bottom: 4px !important;
+  }
+  .deck-card .card-desc {
+    font-size: 12.5px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* 8. Section 3 (Story): Bottom Area, Never Over Face */
+  .story-scene {
+    justify-content: flex-end !important;
+    padding-bottom: 26px !important;
+  }
+
   .story-progress-rail {
     display: none !important;
   }
 
   .story-lines-container {
     width: 100% !important;
-    gap: 14px !important;
+    gap: 10px !important;
   }
 
   .story-line {
-    font-size: clamp(1.0rem, 3.8vw, 1.25rem) !important;
-    line-height: 1.5 !important;
+    font-size: 14px !important;
+    line-height: 1.45 !important;
+    transform: none !important;
+  }
+
+  .story-line.active {
+    font-size: 16.5px !important;
     transform: none !important;
   }
 
   .story-line.brand-heading {
-    font-size: clamp(1.4rem, 5.5vw, 1.8rem) !important;
+    font-size: 22px !important;
   }
 
-  /* 9. Section 4 Booking Form */
+  /* 9. Section 4 (Pull Up a Chair): Bottom Area, Compact */
+  .chair-scene {
+    justify-content: flex-end !important;
+    padding-bottom: 20px !important;
+  }
+
   .chair-title {
-    font-size: clamp(1.5rem, 6vw, 2.2rem) !important;
+    font-size: 20px !important;
     line-height: 1.25 !important;
+    margin-bottom: 4px !important;
+  }
+
+  .chair-desc {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    margin-bottom: 10px !important;
   }
 
   .mug-form-wrapper {
     max-width: 100% !important;
     width: 100% !important;
+    margin-top: 4px !important;
+  }
+
+  .steam-emitter {
+    top: -36px !important;
+    height: 40px !important;
   }
 
   .mug-body {
-    padding: 22px 16px 26px 16px !important;
-    border-radius: 18px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    padding: 16px 14px 18px 14px !important;
+    border-radius: 16px !important;
+    gap: 10px !important;
+    background: rgba(14, 25, 48, 0.75) !important;
   }
 
   .form-row {
     grid-template-columns: 1fr !important;
-    gap: 10px !important;
+    gap: 8px !important;
   }
 
   .glass-input {
     width: 100% !important;
-    font-size: 0.92rem !important;
-    padding: 12px 14px !important;
-    box-sizing: border-box !important;
+    font-size: 13px !important;
+    padding: 10px 12px !important;
+  }
+
+  .btn-reserve {
+    padding: 11px 16px !important;
+    font-size: 13.5px !important;
   }
 
   /* 10. Footer Panel */
   .footer-panel {
-    padding: 26px 18px !important;
-    border-radius: 20px !important;
+    padding: 24px 16px !important;
+    border-radius: 18px !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }

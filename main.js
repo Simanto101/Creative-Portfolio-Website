@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(pointer: coarse)').matches;
-  const isMobile = window.innerWidth < 1024;
+  const isMobile = window.innerWidth < 768;
 
   // =========================================================================
   // 1. LENIS SMOOTH MOMENTUM SCROLL ENGINE
@@ -173,17 +173,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const nh = Math.ceil(ih * scale);
 
     let ox, oy;
-    const currentlyMobile = window.innerWidth < 1024;
+    const currentlyMobile = window.innerWidth < 768;
 
     if (currentlyMobile) {
-      // 1. Mobile & Tablet Re-framing: Keep Simanto fully in frame without cutting off
+      // 1. Mobile Re-framing: Keep Simanto framed in top ~55% of screen & centered per scroll phase
       const focusX = getFrameFocusX(exactFrame);
       ox = Math.floor((cw / 2) - (nw * focusX));
-      // Clamp ox so it covers edge to edge without black gaps
       ox = Math.min(0, Math.max(cw - nw, ox));
-      // Position person in the upper/mid portion so text panels sit cleanly below his face
-      oy = Math.floor((ch - nh) * 0.14);
-      oy = Math.min(0, Math.max(ch - nh, oy));
+      // Top headroom aligned so face and shoulders remain in the top ~55%
+      oy = 0;
     } else {
       // Desktop: Keep exactly as original centered design without changing desktop look
       ox = Math.floor((cw - nw) / 2);
