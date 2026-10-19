@@ -180,8 +180,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const focusX = getFrameFocusX(exactFrame);
       ox = Math.floor((cw / 2) - (nw * focusX));
       ox = Math.min(0, Math.max(cw - nw, ox));
-      // Top headroom aligned so face and shoulders remain in the top ~55%
-      oy = 0;
+      // Head sits ~12-15% from top of screen:
+      // In 1280x720 video, head starts at y=48 (6.7%).
+      // oy = Math.floor(ch * 0.06) places head at (0.067 + 0.06) = 12.7% from top of screen!
+      oy = Math.floor(ch * 0.06);
     } else {
       // Desktop: Keep exactly as original centered design without changing desktop look
       ox = Math.floor((cw - nw) / 2);
@@ -191,6 +193,16 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, ox, oy, nw, nh);
+
+    // Behind footer, don't show the zoomed, pixelated video; fade out canvas smoothly before footer
+    if (canvas) {
+      if (p >= 0.86) {
+        const fade = Math.max(0, 1 - (p - 0.86) / 0.08);
+        canvas.style.opacity = fade.toFixed(3);
+      } else {
+        canvas.style.opacity = '1';
+      }
+    }
   }
 
   // Scroll Progress Tracking
@@ -286,14 +298,14 @@ document.addEventListener('DOMContentLoaded', () => {
         start: 'top 70%',
         onEnter: () => {
           gsap.fromTo(cards,
-            { opacity: 0, y: 40, scale: 0.92 },
+            { opacity: 0, y: 30, scale: 0.95 },
             {
               opacity: 1,
               y: 0,
               scale: 1,
-              duration: 0.7,
-              stagger: 0.1,
-              ease: 'back.out(1.4)',
+              duration: 0.6,
+              stagger: 0.08,
+              ease: 'power2.out',
               onComplete: () => {
                 if (!isMobile) {
                   cards.forEach((card) => card.classList.add('floating'));
@@ -314,6 +326,25 @@ document.addEventListener('DOMContentLoaded', () => {
         trigger: '#story-section',
         start: 'top 60%',
         end: 'bottom 40%',
+        onLeave: () => {
+          // Immediately hide all story lines when leaving story section downwards so nothing bleeds into coffee section
+          storyLines.forEach((line) => {
+            line.classList.remove('active');
+            line.style.opacity = '0';
+          });
+        },
+        onEnterBack: () => {
+          storyLines.forEach((line) => {
+            line.style.opacity = '';
+          });
+        },
+        onLeaveBack: () => {
+          storyLines.forEach((line, index) => {
+            line.style.opacity = '';
+            if (index === 0) line.classList.add('active');
+            else line.classList.remove('active');
+          });
+        },
         onUpdate: (self) => {
           const progress = self.progress;
           const activeIndex = Math.min(
@@ -322,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
           );
 
           storyLines.forEach((line, index) => {
+            line.style.opacity = '';
             if (index === activeIndex) {
               line.classList.add('active');
             } else {
@@ -338,19 +370,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Section 4: Pull Up a Chair Entrance
-    gsap.fromTo('.chair-content',
-      { opacity: 0, y: 35 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.9,
-        ease: 'power3.out',
+    if (window.innerWidth < 768) {
+      // Mobile Coffee Moment:
+      // Clean screen hold: Simanto + mug fully visible in top ~60% for a short scroll hold
+      // Then heading & line fade in BELOW the mug, then mug-shaped glass form
+      gsap.set('.chair-title, .chair-desc', { opacity: 0, y: 16 });
+      gsap.set('.mug-form-wrapper', { opacity: 0, y: 24 });
+
+      const chairTl = gsap.timeline({
         scrollTrigger: {
           trigger: '#chair-section',
-          start: 'top 75%'
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.5
         }
-      }
-    );
+      });
+
+      chairTl
+        .to({}, { duration: 0.35 }) // Clean scroll hold for Simanto + mug (no text over him or mug)
+        .to('.chair-title, .chair-desc', { opacity: 1, y: 0, duration: 0.30, ease: 'power2.out' })
+        .to('.mug-form-wrapper', { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' });
+
+      // Hide mobile burger button while over form so it never overlaps inputs or Reserve button
+      ScrollTrigger.create({
+        trigger: '#chair-section',
+        start: 'top 40%',
+        end: 'bottom 20%',
+        onEnter: () => gsap.to('#mobile-burger', { opacity: 0, pointerEvents: 'none', duration: 0.2 }),
+        onLeave: () => gsap.to('#mobile-burger', { opacity: 1, pointerEvents: 'auto', duration: 0.2 }),
+        onEnterBack: () => gsap.to('#mobile-burger', { opacity: 0, pointerEvents: 'none', duration: 0.2 }),
+        onLeaveBack: () => gsap.to('#mobile-burger', { opacity: 1, pointerEvents: 'auto', duration: 0.2 })
+      });
+    } else {
+      gsap.fromTo('.chair-content',
+        { opacity: 0, y: 35 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '#chair-section',
+            start: 'top 75%'
+          }
+        }
+      );
+    }
 
     // Section 5: Footer Reveal
     gsap.fromTo('.footer-panel',

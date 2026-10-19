@@ -1229,17 +1229,17 @@ button {
 }
 
 @media (max-width: 768px) {
-  /* 1. Mobile Sections: Content in bottom ~45%, top ~55% clear for Simanto */
+  /* 1. Mobile Sections: Content in bottom ~40%, top ~60% clear for Simanto */
   .scene-section {
-    padding: 0 18px 24px 18px !important;
+    padding: 0 16px 20px 16px !important;
     min-height: 100vh !important;
     min-height: 100dvh !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: flex-end !important; /* Bottom ~45% */
+    justify-content: flex-end !important; /* Bottom ~40% */
     align-items: stretch !important;
     /* Smooth dark gradient: 0-48% transparent (face/shoulders), fades to #060b18 at 85% */
-    background: linear-gradient(180deg, transparent 0%, transparent 48%, rgba(6, 11, 24, 0.40) 62%, rgba(6, 11, 24, 0.85) 85%, #060b18 100%) !important;
+    background: linear-gradient(180deg, transparent 0%, transparent 48%, rgba(6, 11, 24, 0.38) 60%, rgba(6, 11, 24, 0.85) 85%, #060b18 100%) !important;
     box-sizing: border-box !important;
     position: relative !important;
   }
@@ -1252,7 +1252,7 @@ button {
   }
 
   /* 2. No Card Backgrounds on Mobile - Content sits cleanly over the smooth gradient */
-  .hero-content, .story-content, .chair-content {
+  .hero-content, .glance-content, .story-content {
     background: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -1265,25 +1265,18 @@ button {
     box-sizing: border-box !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 4px !important;
-  }
-
-  .glance-content {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    gap: 3px !important;
   }
 
   /* 3. Eyebrow */
   .eyebrow {
-    font-size: 11px !important;
+    font-size: 10.5px !important;
     letter-spacing: 0.12em !important;
     white-space: normal !important;
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 5px !important;
     line-height: 1.35 !important;
     margin-bottom: 2px !important;
   }
@@ -1295,7 +1288,7 @@ button {
 
   /* 4. Exact Requested Hero Typography Sizes: "Simanto" 56px, "MITRO" 30px, headline 16px */
   .hero-name-wrapper {
-    margin: 2px 0 !important;
+    margin: 1px 0 !important;
   }
 
   .hero-name-serif {
@@ -1313,7 +1306,7 @@ button {
 
   .hero-tagline {
     font-size: 16px !important;
-    line-height: 1.45 !important;
+    line-height: 1.42 !important;
     margin: 4px 0 6px 0 !important;
     color: var(--text-secondary) !important;
   }
@@ -1323,7 +1316,7 @@ button {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
-    gap: 6px !important;
+    gap: 5px !important;
     width: 100% !important;
     margin-top: 2px !important;
   }
@@ -1331,9 +1324,9 @@ button {
   .glass-pill {
     display: inline-flex !important;
     align-items: center !important;
-    padding: 6px 11px !important;
+    padding: 5px 10px !important;
     font-size: 11px !important;
-    gap: 6px !important;
+    gap: 5px !important;
     border-radius: 999px !important;
     white-space: nowrap !important;
     flex: 1 1 auto !important;
@@ -1350,12 +1343,12 @@ button {
   .featured-strip {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 7px 10px !important;
+    padding: 6px 10px !important;
     margin-top: 6px !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 10px !important;
+    gap: 8px !important;
     background: rgba(14, 25, 48, 0.45) !important;
     border-radius: 10px !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -1364,7 +1357,7 @@ button {
   }
 
   .featured-label {
-    font-size: 8.5px !important;
+    font-size: 8px !important;
     letter-spacing: 0.12em !important;
     flex-shrink: 0 !important;
     border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -1377,16 +1370,16 @@ button {
     flex: 1 !important;
     overflow: hidden !important;
     position: relative !important;
-    /* Soft fade masks on both left and right edges */
-    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%) !important;
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%) !important;
+    /* Soft fade masks on both edges */
+    mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%) !important;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%) !important;
   }
 
   .marquee-track {
     display: flex !important;
     align-items: center !important;
-    gap: 24px !important;
-    padding-left: 10px !important; /* Starts fully visible, no cut-off 'hom Alo' */
+    gap: 22px !important;
+    padding-left: 8px !important; /* Starts fully visible, no cut-off 'hom Alo' */
     animation: marqueeScroll 14s linear infinite !important;
     will-change: transform;
     white-space: nowrap !important;
@@ -1398,73 +1391,110 @@ button {
   }
 
   .outlet-item {
-    font-size: 11.5px !important;
+    font-size: 11px !important;
     font-weight: 600 !important;
     flex-shrink: 0 !important;
   }
 
-  /* 7. Section 2 (At a Glance): Horizontal Swipeable Fan/Carousel in Bottom Area */
+  /* 7. Section 2 (At a Glance): 2x2 Grid Inside Screen, No Cut-Offs, No Big Empty Space */
   .glance-scene {
     justify-content: flex-end !important;
-    padding-bottom: 22px !important;
+    padding-bottom: 18px !important;
+    background: linear-gradient(180deg, transparent 0%, transparent 40%, rgba(6, 11, 24, 0.42) 55%, rgba(6, 11, 24, 0.88) 75%, #060b18 90%, #060b18 100%) !important;
   }
 
   .scene-title {
-    font-size: 24px !important;
+    font-size: 21px !important;
     margin-bottom: 4px !important;
+    line-height: 1.2 !important;
   }
 
   .cards-deck {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    scroll-snap-type: x mandatory !important;
-    -webkit-overflow-scrolling: touch !important;
-    gap: 12px !important;
-    padding: 6px 2px 14px 2px !important;
-    margin-top: 8px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
     width: 100% !important;
-    scrollbar-width: none !important;
-  }
-  .cards-deck::-webkit-scrollbar {
-    display: none !important;
+    margin-top: 4px !important;
+    padding: 0 !important;
+    overflow: visible !important;
   }
 
   .deck-card {
-    flex: 0 0 78% !important;
-    max-width: 80% !important;
-    scroll-snap-align: start !important;
-    min-height: 175px !important;
-    padding: 16px 14px !important;
-    background: rgba(14, 25, 48, 0.72) !important;
+    min-height: 118px !important;
+    padding: 10px 10px 10px 10px !important;
+    background: rgba(14, 25, 48, 0.78) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 16px !important;
+    border-radius: 14px !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
-    box-shadow: 0 10px 25px -6px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.6) !important;
     transform: none !important;
     animation: none !important;
     box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .deck-card .card-top {
-    margin-bottom: 8px !important;
-  }
-  .deck-card .card-title {
-    font-size: 16px !important;
-    margin-bottom: 4px !important;
-  }
-  .deck-card .card-desc {
-    font-size: 12.5px !important;
-    line-height: 1.4 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 2px !important;
   }
 
-  /* 8. Section 3 (Story): Bottom Area, Never Over Face */
+  .deck-card .card-icon-wrap {
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 7px !important;
+  }
+
+  .deck-card .card-icon-wrap svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  .deck-card .card-number {
+    font-size: 10px !important;
+    opacity: 0.5 !important;
+  }
+
+  .deck-card .card-title {
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    margin-bottom: 2px !important;
+    color: #ffffff !important;
+  }
+
+  .deck-card .card-desc {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+    color: var(--text-secondary) !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .deck-card .card-link {
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    color: var(--accent-cyan) !important;
+    margin-top: 2px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+  }
+
+  /* 8. Section 3 (Story): Overflow Hidden, No bleed into Coffee section */
   .story-scene {
+    overflow: hidden !important;
     justify-content: flex-end !important;
-    padding-bottom: 26px !important;
+    padding-bottom: 24px !important;
+    background: linear-gradient(180deg, transparent 0%, transparent 45%, rgba(6, 11, 24, 0.40) 60%, rgba(6, 11, 24, 0.85) 80%, #060b18 95%, #060b18 100%) !important;
   }
 
   .story-progress-rail {
@@ -1483,70 +1513,105 @@ button {
   }
 
   .story-line.active {
-    font-size: 16.5px !important;
+    font-size: 16px !important;
     transform: none !important;
   }
 
   .story-line.brand-heading {
-    font-size: 22px !important;
+    font-size: 21px !important;
   }
 
-  /* 9. Section 4 (Pull Up a Chair): Bottom Area, Compact */
+  /* 9. Section 4 (Coffee Moment & Pull Up a Chair): Sticky Hold Sequence & Below Mug Form */
   .chair-scene {
+    position: relative !important;
+    min-height: 170vh !important;
+    display: flex !important;
+    flex-direction: column !important;
     justify-content: flex-end !important;
-    padding-bottom: 20px !important;
+    padding: 0 16px 20px 16px !important;
+    background: linear-gradient(180deg, transparent 0%, transparent 45%, rgba(6, 11, 24, 0.40) 60%, rgba(6, 11, 24, 0.88) 80%, #060b18 100%) !important;
+  }
+
+  .chair-content {
+    position: sticky !important;
+    bottom: 18px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    box-sizing: border-box !important;
   }
 
   .chair-title {
-    font-size: 20px !important;
+    font-size: 19px !important;
     line-height: 1.25 !important;
-    margin-bottom: 4px !important;
+    margin-bottom: 2px !important;
   }
 
   .chair-desc {
-    font-size: 13px !important;
-    line-height: 1.4 !important;
-    margin-bottom: 10px !important;
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+    margin-bottom: 6px !important;
   }
 
   .mug-form-wrapper {
     max-width: 100% !important;
     width: 100% !important;
-    margin-top: 4px !important;
+    margin-top: 2px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .steam-emitter {
-    top: -36px !important;
-    height: 40px !important;
+    top: -30px !important;
+    height: 34px !important;
   }
 
   .mug-body {
-    padding: 16px 14px 18px 14px !important;
+    padding: 14px 12px 16px 12px !important;
     border-radius: 16px !important;
-    gap: 10px !important;
-    background: rgba(14, 25, 48, 0.75) !important;
+    gap: 8px !important;
+    background: rgba(14, 25, 48, 0.80) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .form-row {
     grid-template-columns: 1fr !important;
-    gap: 8px !important;
+    gap: 6px !important;
   }
 
   .glass-input {
     width: 100% !important;
-    font-size: 13px !important;
-    padding: 10px 12px !important;
+    font-size: 12.5px !important;
+    padding: 9px 11px !important;
+    box-sizing: border-box !important;
   }
 
   .btn-reserve {
-    padding: 11px 16px !important;
-    font-size: 13.5px !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    width: 100% !important;
   }
 
-  /* 10. Footer Panel */
+  /* 10. Footer Panel & Clean Dark Gradient Background (No pixelated video behind) */
+  .footer-section {
+    position: relative !important;
+    width: 100% !important;
+    background: #040814 !important;
+    background: linear-gradient(180deg, #040814 0%, #060b18 45%, #020409 100%) !important;
+    z-index: 30 !important;
+    padding: 60px 16px 36px 16px !important;
+  }
+
   .footer-panel {
-    padding: 24px 16px !important;
-    border-radius: 18px !important;
+    padding: 22px 14px !important;
+    border-radius: 16px !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
