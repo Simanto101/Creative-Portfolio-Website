@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(pointer: coarse)').matches;
-  const isMobile = window.innerWidth < 768;
+  const isMobile = window.innerWidth < 1024;
 
   // =========================================================================
   // 1. LENIS SMOOTH MOMENTUM SCROLL ENGINE
@@ -37,14 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
-  // 2. 96 PROGRESSIVE WEBP FRAMES & CANVAS ENGINE (60fps on Galaxy A32)
+  // 2. 96 PROGRESSIVE WEBP FRAMES & CANVAS ENGINE (Full HD 1280x720 Retina Clarity)
   // =========================================================================
   const TOTAL_FRAMES = 96;
   const canvas = document.getElementById('hero-canvas');
   const ctx = canvas ? canvas.getContext('2d', { alpha: false, desynchronized: true }) : null;
 
-  // Choose between mobile (720px, 560KB total) or desktop (1280px, 1.2MB total)
-  const frameDir = isMobile ? './frames-mobile' : './frames-desktop';
+  // Always use full 1280x720 HD frames for pristine clarity on mobile, tablet & desktop
+  const frameDir = './frames-desktop';
   const getFrameUrl = (idx) => `${frameDir}/frame-${String(idx).padStart(3, '0')}.webp`;
 
   const frameImages = new Array(TOTAL_FRAMES);
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resizeCanvas() {
     if (!canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
     canvas.width = Math.round(window.innerWidth * dpr);
     canvas.height = Math.round(window.innerHeight * dpr);
     render(smoothProgress);
@@ -112,22 +112,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Dynamic Horizontal Focus X on Mobile:
-  // Phase 1 (Hero: 0 to 0.28): Person on the left -> focus 0.28
-  // Phase 2 (At a Glance: 0.28 to 0.55): Person shifts to right -> focus glides 0.28 -> 0.74
-  // Phase 3 (Story: 0.55 to 0.75): Person moves center/left -> focus glides 0.74 -> 0.38
-  // Phase 4 (Pull Up a Chair: 0.75 to 1.0): Person holds cup forward -> focus 0.36
-  function getMobileFocusX(progress) {
-    if (progress <= 0.28) {
-      return 0.28;
-    } else if (progress <= 0.55) {
-      const t = (progress - 0.28) / (0.55 - 0.28);
-      return 0.28 + t * (0.74 - 0.28);
-    } else if (progress <= 0.75) {
-      const t = (progress - 0.55) / (0.75 - 0.55);
-      return 0.74 - t * (0.74 - 0.38);
+  // Precise dynamic tracking of Simanto's center of mass across frames
+  // Simanto's actual bounds: Frame 1-20 (cx ~0.27), Frame 20-60 (cx ~0.33 -> 0.42), Frame 60-96 (cx ~0.42 -> 0.31)
+  function getFrameFocusX(frameIdx) {
+    const norm = Math.min(1, Math.max(0, frameIdx / (TOTAL_FRAMES - 1)));
+    if (norm <= 0.20) {
+      return 0.27 + (norm / 0.20) * 0.05; // 0.27 -> 0.32
+    } else if (norm <= 0.55) {
+      const t = (norm - 0.20) / (0.55 - 0.20);
+      return 0.32 + t * (0.42 - 0.32); // 0.32 -> 0.42 (when cup turns towards center)
+    } else if (norm <= 0.75) {
+      const t = (norm - 0.55) / (0.75 - 0.55);
+      return 0.42 - t * (0.42 - 0.32); // 0.42 -> 0.32
     } else {
-      return 0.36;
+      return 0.32;
     }
   }
 
@@ -175,16 +173,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const nh = Math.ceil(ih * scale);
 
     let ox, oy;
-    const currentlyMobile = window.innerWidth < 768;
+    const currentlyMobile = window.innerWidth < 1024;
 
     if (currentlyMobile) {
-      // 1. Mobile Re-framing: Center the person based on scroll phase
-      const focusX = getMobileFocusX(p);
+      // 1. Mobile & Tablet Re-framing: Keep Simanto fully in frame without cutting off
+      const focusX = getFrameFocusX(exactFrame);
       ox = Math.floor((cw / 2) - (nw * focusX));
       // Clamp ox so it covers edge to edge without black gaps
       ox = Math.min(0, Math.max(cw - nw, ox));
-      // Position person in the upper/mid portion so bottom dark gradient leaves text readable
-      oy = Math.floor((ch - nh) * 0.12);
+      // Position person in the upper/mid portion so text panels sit cleanly below his face
+      oy = Math.floor((ch - nh) * 0.14);
+      oy = Math.min(0, Math.max(ch - nh, oy));
     } else {
       // Desktop: Keep exactly as original centered design without changing desktop look
       ox = Math.floor((cw - nw) / 2);
