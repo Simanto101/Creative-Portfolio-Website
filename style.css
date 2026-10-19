@@ -106,19 +106,52 @@ button {
   pointer-events: none;
   z-index: 999;
   mix-blend-mode: screen;
-  transition: opacity 0.4s ease, transform 0.12s ease-out;
+  transition: opacity 0.4s ease;
   transform: translate3d(-1000px, -1000px, 0);
   opacity: 0;
+  will-change: transform;
+}
+
+/* stronger core over interactive elements (--hot is lerped 0..1 in JS) */
+#cursor-glow::after {
+  content: "";
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.32) 0%, rgba(56, 189, 248, 0.1) 45%, transparent 70%);
+  opacity: var(--hot, 0);
+}
+
+#cursor-smoke {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 760px;
+  height: 760px;
+  margin: -380px 0 0 -380px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 46%, rgba(56, 189, 248, 0.07) 0%, transparent 52%),
+    radial-gradient(circle at 60% 58%, rgba(147, 197, 253, 0.05) 0%, transparent 48%);
+  filter: blur(18px);
+  pointer-events: none;
+  z-index: 998;
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  transform: translate3d(-1000px, -1000px, 0);
+  will-change: transform;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  body:hover #cursor-glow {
+  body:hover #cursor-glow,
+  body:hover #cursor-smoke {
     opacity: 1;
   }
 }
 
 @media (hover: none) or (pointer: coarse) {
-  #cursor-glow {
+  #cursor-glow, #cursor-smoke {
     display: none !important;
   }
 }
@@ -557,11 +590,29 @@ button {
 }
 
 .featured-outlets {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 26px, #000 calc(100% - 30px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 26px, #000 calc(100% - 30px), transparent 100%);
+  padding-left: 26px;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  flex-wrap: nowrap;
+  animation: marqueeScroll 22s linear 1.6s infinite;
+  will-change: transform;
+}
+
+.featured-strip:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeScroll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
 }
 
 .outlet-item {
@@ -571,6 +622,8 @@ button {
   letter-spacing: -0.01em;
   transition: color 0.2s;
   white-space: nowrap;
+  padding-right: 34px; /* spacing inside items so -50% loops seamlessly */
+  flex-shrink: 0;
 }
 
 .outlet-item:hover {
@@ -769,6 +822,7 @@ button {
 }
 
 .story-lines-container {
+  transition: opacity 0.35s ease;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -781,15 +835,34 @@ button {
   line-height: 1.45;
   color: var(--text-muted);
   font-weight: 400;
-  transition: all 0.5s var(--ease-out-expo);
-  transform: translateY(6px);
-  opacity: 0.25;
+  /* upcoming line: hidden below its mask, blurred */
+  opacity: 0;
+  transform: translate3d(0, 0.6em, 0);
+  filter: blur(6px);
+  clip-path: inset(0 0 100% 0);
+  transition:
+    opacity 0.55s var(--ease-out-expo) 0.18s,
+    transform 0.7s var(--ease-out-expo) 0.18s,
+    filter 0.6s var(--ease-out-expo) 0.18s,
+    clip-path 0.7s var(--ease-out-expo) 0.18s,
+    color 0.4s ease;
+}
+
+.story-line.is-past {
+  /* previous line fades out first (no delay), stays as a faint trail on desktop */
+  opacity: 0.16;
+  transform: translate3d(0, 0, 0);
+  filter: blur(0.5px);
+  clip-path: inset(0 0 0 0);
+  transition-delay: 0s;
 }
 
 .story-line.active {
   color: #ffffff;
   opacity: 1;
-  transform: translateY(0) scale(1.03);
+  transform: translate3d(0, 0, 0);
+  filter: blur(0);
+  clip-path: inset(0 0 0 0);
   text-shadow: 0 0 24px rgba(56, 189, 248, 0.4);
   font-weight: 500;
 }
@@ -1173,6 +1246,215 @@ button {
 }
 
 /* ==========================================================================
+   MOTION LAYER (intro reveals, drawer, tilt/glare, magnetic glow, mug shimmer)
+   ========================================================================== */
+/* Hero intro — pure CSS so it starts on first paint (no wait for JS/CDN; good LCP).
+   Letters rise out of a mask with a blur-to-sharp; on desktop they also slide out from
+   his side (left), as if emerging from behind him. */
+:root { --intro-ease: cubic-bezier(0.16, 1, 0.3, 1); --char-from-x: -55%; }
+.hero-content .eyebrow { animation: introRise 0.8s var(--intro-ease) 0.05s both; }
+.hero-name-serif .char { animation: charRise 1.1s var(--intro-ease) calc(0.1s + var(--i, 0) * 0.05s) both; }
+.hero-name-outline .char { animation: charRise 1s var(--intro-ease) calc(0.35s + var(--i, 0) * 0.06s) both; }
+.hero-tagline { animation: lineRise 1.1s var(--intro-ease) 0.1s both; }
+.hero-pills .glass-pill { animation: introRise 0.8s var(--intro-ease) 0.8s both; }
+.hero-pills .glass-pill + .glass-pill { animation-delay: 0.88s; }
+.hero-content .featured-strip { animation: introRise 0.8s var(--intro-ease) 0.95s both; }
+@keyframes charRise {
+  from { opacity: 0; transform: translate3d(var(--char-from-x), 115%, 0); filter: blur(10px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+/* no opacity in this one: the headline is painted from the first frame (it is the LCP element) */
+@keyframes lineRise {
+  from { transform: translate3d(0, 14px, 0); filter: blur(8px); }
+  to { transform: none; filter: blur(0); }
+}
+@keyframes introRise {
+  from { opacity: 0; transform: translate3d(0, 16px, 0); }
+  to { opacity: 1; transform: none; }
+}
+@media (max-width: 767.98px) {
+  :root { --char-from-x: 0%; }
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Split letters: each char rises out of its own mask */
+.char-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding: 0.06em 0.1em 0.14em 0.04em;
+  margin: -0.06em -0.1em -0.14em -0.04em;
+}
+.char {
+  display: inline-block;
+  will-change: transform;
+}
+.hero-name-serif.is-split {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+.hero-name-serif.is-split .char {
+  background: linear-gradient(180deg, #ffffff 40%, #bae6fd 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-name-outline .char {
+  display: inline-block;
+}
+/* Burger -> X */
+.mobile-nav-toggle span {
+  transform-origin: center;
+}
+.mobile-nav-toggle.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.mobile-nav-toggle.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0.2); }
+.mobile-nav-toggle.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.mobile-nav-toggle:active { transform: scale(0.94); }
+
+/* Full-screen glass menu with staggered links */
+.mobile-nav-drawer {
+  background: radial-gradient(120% 80% at 80% 0%, rgba(56, 189, 248, 0.14) 0%, transparent 55%), rgba(4, 8, 20, 0.86);
+  gap: 18px;
+  visibility: hidden;
+  transition: opacity 0.45s var(--ease-out-expo), visibility 0s linear 0.45s;
+}
+.mobile-nav-drawer.open {
+  visibility: visible;
+  transition: opacity 0.45s var(--ease-out-expo), visibility 0s;
+}
+.mobile-nav-drawer > a,
+.mobile-nav-drawer .drawer-social {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  filter: blur(4px);
+  transition: opacity 0.5s var(--ease-out-expo), transform 0.6s var(--ease-out-expo), filter 0.5s ease, color 0.2s;
+}
+.mobile-nav-drawer.open > a,
+.mobile-nav-drawer.open .drawer-social {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  filter: blur(0);
+}
+.mobile-nav-drawer.open > :nth-child(1) { transition-delay: 0.06s; }
+.mobile-nav-drawer.open > :nth-child(2) { transition-delay: 0.10s; }
+.mobile-nav-drawer.open > :nth-child(3) { transition-delay: 0.14s; }
+.mobile-nav-drawer.open > :nth-child(4) { transition-delay: 0.18s; }
+.mobile-nav-drawer.open > :nth-child(5) { transition-delay: 0.22s; }
+.mobile-nav-drawer.open > :nth-child(6) { transition-delay: 0.26s; }
+.mobile-nav-drawer.open > :nth-child(7) { transition-delay: 0.30s; }
+.mobile-nav-drawer.open > :nth-child(8) { transition-delay: 0.36s; }
+.mobile-nav-drawer > a:active { color: var(--accent-cyan); }
+.mobile-nav-drawer .nav-cta {
+  margin: 10px 0 0 0;
+  padding: 12px 24px;
+  font-size: 1rem;
+}
+.drawer-social {
+  display: flex;
+  gap: 18px;
+  margin-top: 14px;
+}
+.drawer-social a {
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.drawer-social a:hover, .drawer-social a:active { color: var(--accent-cyan); }
+body.menu-open { overflow: hidden; }
+
+/* Cards: 3D tilt + glare (desktop), highlight when reached via a link */
+.deck-card {
+  --rx: 0deg;
+  --ry: 0deg;
+  --gx: 50%;
+  --gy: 0%;
+  transform-style: preserve-3d;
+}
+.deck-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--gx) var(--gy), rgba(255, 255, 255, 0.22) 0%, rgba(186, 230, 253, 0.08) 28%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.deck-card.is-tilting {
+  animation: none !important;
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-14px) scale(1.03) !important;
+  transition: transform 0.12s linear, box-shadow 0.45s var(--ease-out-expo), border-color 0.3s;
+}
+.deck-card.is-tilting::after { opacity: 1; }
+.deck-card.is-highlighted {
+  border-color: rgba(125, 211, 252, 0.85) !important;
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.5), 0 0 40px rgba(56, 189, 248, 0.45) !important;
+}
+
+/* CTA glow pulse (opacity-only animation on a pseudo element = cheap) */
+.nav-cta, .btn-reserve, .footer-chair-btn {
+  position: relative;
+  will-change: transform;
+}
+.nav-cta::after, .btn-reserve::after, .footer-chair-btn::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 22px 2px rgba(56, 189, 248, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  animation: ctaPulse 3.2s ease-in-out infinite;
+}
+@keyframes ctaPulse {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.75; }
+}
+
+/* Mug glass: steam-like shimmer drifting up through the glass + glowing focus */
+.mug-body {
+  overflow: hidden;
+  isolation: isolate;
+}
+.mug-body::before {
+  content: "";
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  top: 0;
+  height: 200%;
+  background:
+    radial-gradient(40% 18% at 30% 70%, rgba(186, 230, 253, 0.07) 0%, transparent 70%),
+    radial-gradient(35% 14% at 70% 40%, rgba(255, 255, 255, 0.06) 0%, transparent 70%),
+    linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.05) 50%, transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+  animation: mugShimmer 9s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes mugShimmer {
+  0% { transform: translate3d(-6%, 0, 0); }
+  50% { transform: translate3d(6%, -50%, 0); }
+  100% { transform: translate3d(-6%, 0, 0); }
+}
+.glass-input:focus {
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18), 0 0 18px rgba(56, 189, 248, 0.35);
+}
+
+/* ==========================================================================
    TABLET & MOBILE OPTIMIZATIONS (<1024px and <768px)
    Keeps Desktop (>=1024px) 100% untouched
    ========================================================================== */
@@ -1356,31 +1638,12 @@ button {
   }
 
   .featured-outlets {
-    display: block;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    padding-left: 14px; /* first outlet starts fully visible, right of the fade */
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%);
-  }
-
-  .marquee-track {
-    display: flex;
-    width: max-content;
-    animation: marqueeScroll 16s linear 1.6s infinite;
-    will-change: transform;
+    padding-left: 24px;
   }
 
   .outlet-item {
     font-size: 12px;
-    padding-right: 26px; /* spacing lives inside items so -50% loops seamlessly */
-    flex-shrink: 0;
-  }
-
-  @keyframes marqueeScroll {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
+    padding-right: 26px;
   }
 
   /* ---------- 2. AT A GLANCE: 2x2 compact grid, fully on screen ---------- */
@@ -1492,20 +1755,23 @@ button {
   }
 
   .story-line,
-  .story-line.brand-heading {
+  .story-line.brand-heading,
+  .story-line.is-past {
     grid-area: 1 / 1;
     align-self: end;
     font-size: 21px;
     line-height: 1.4;
     color: #ffffff;
     opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.45s var(--ease-out-expo), transform 0.45s var(--ease-out-expo);
+  }
+
+  .story-line.is-past {
+    transform: translate3d(0, -0.35em, 0);
+    filter: blur(4px);
+    transition-delay: 0s;
   }
 
   .story-line.active {
-    opacity: 1;
-    transform: translateY(0);
     font-weight: 500;
   }
 
@@ -1611,6 +1877,18 @@ button {
     pointer-events: none;
   }
 
+  /* Tap feedback */
+  .deck-card.is-pressed,
+  .deck-card:active {
+    transform: scale(0.97) !important;
+    border-color: rgba(125, 211, 252, 0.6) !important;
+    box-shadow: 0 0 26px rgba(56, 189, 248, 0.35) !important;
+    transition: transform 0.12s ease, box-shadow 0.2s ease !important;
+  }
+  .glass-pill:active, .btn-reserve:active, .footer-chair-btn:active, .social-btn:active {
+    transform: scale(0.96);
+  }
+
   /* ---------- 5. FOOTER: plain dark gradient, no video behind ---------- */
   .footer-section {
     background: linear-gradient(180deg, #060b18 0%, #050916 45%, #020409 100%);
@@ -1650,4 +1928,7 @@ button {
   .marquee-track {
     animation: none !important;
   }
+  .hero-name-serif .char, .hero-name-outline .char, .hero-tagline, .hero-pills .glass-pill, .hero-content .eyebrow, .hero-content .featured-strip { animation: none !important; }
+  .story-line { filter: none !important; clip-path: none !important; transform: none !important; }
+  .nav-cta::after, .btn-reserve::after, .footer-chair-btn::after, .mug-body::before { animation: none !important; }
 }
