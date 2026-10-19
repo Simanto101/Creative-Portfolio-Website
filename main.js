@@ -43,24 +43,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('hero-canvas');
   const ctx = canvas ? canvas.getContext('2d', { alpha: false, desynchronized: true }) : null;
 
-  // Always use full 1280x720 HD frames for pristine clarity on mobile, tablet & desktop
-  const frameDir = './frames-desktop';
+  // Desktop/tablet (>=768px) use frames-desktop; phones (<768px) use frames-mobile (1280x720 WebP, ~15KB each)
+  const frameDir = isMobile ? './frames-mobile' : './frames-desktop';
   const getFrameUrl = (idx) => `${frameDir}/frame-${String(idx).padStart(3, '0')}.webp`;
 
   const frameImages = new Array(TOTAL_FRAMES);
   const loadedIndices = new Set();
   let targetProgress = 0;
   let smoothProgress = 0;
+  let smoothY = 0;
+  const footerEl = document.getElementById('footer-section');
 
   function resizeCanvas() {
     if (!canvas) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
     canvas.width = Math.round(window.innerWidth * dpr);
     canvas.height = Math.round(window.innerHeight * dpr);
-    render(smoothProgress);
+    computeMobileKeys();
+    render();
   }
 
   window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('load', () => computeMobileKeys());
 
   // Progressive Preloading Strategy:
   // Step 1: Preload frame 1 immediately for instant first-paint
@@ -112,22 +116,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Precise dynamic tracking of Simanto's center of mass across frames
-  // Simanto's actual bounds: Frame 1-20 (cx ~0.27), Frame 20-60 (cx ~0.33 -> 0.42), Frame 60-96 (cx ~0.42 -> 0.31)
-  function getFrameFocusX(frameIdx) {
-    const norm = Math.min(1, Math.max(0, frameIdx / (TOTAL_FRAMES - 1)));
-    if (norm <= 0.20) {
-      return 0.27 + (norm / 0.20) * 0.05; // 0.27 -> 0.32
-    } else if (norm <= 0.55) {
-      const t = (norm - 0.20) / (0.55 - 0.20);
-      return 0.32 + t * (0.42 - 0.32); // 0.32 -> 0.42 (when cup turns towards center)
-    } else if (norm <= 0.75) {
-      const t = (norm - 0.55) / (0.75 - 0.55);
-      return 0.42 - t * (0.42 - 0.32); // 0.42 -> 0.32
-    } else {
-      return 0.32;
-    }
-  }
+  // MOBILE (<768px) FRAMING DATA — measured per frame from the image sequence:
+  // FOCUS_X = horizontal centre of Simanto (+ mug), HEAD_Y = top of his head (both as a fraction of the frame)
+  const FOCUS_X = [0.237,0.237,0.236,0.234,0.232,0.229,0.226,0.223,0.222,0.221,0.222,0.227,0.233,0.243,0.254,0.268,0.284,0.300,0.317,0.334,0.351,0.365,0.384,0.401,0.423,0.445,0.473,0.496,0.523,0.545,0.568,0.585,0.605,0.621,0.640,0.656,0.675,0.693,0.711,0.725,0.739,0.748,0.754,0.758,0.760,0.762,0.764,0.765,0.766,0.767,0.767,0.767,0.766,0.765,0.762,0.757,0.750,0.740,0.727,0.711,0.694,0.675,0.656,0.636,0.615,0.590,0.562,0.530,0.494,0.459,0.424,0.392,0.364,0.340,0.320,0.303,0.290,0.280,0.273,0.268,0.265,0.263,0.263,0.264,0.264,0.265,0.266,0.267,0.268,0.268,0.269,0.270,0.270,0.270,0.270,0.270];
+  const HEAD_Y = [0.300,0.300,0.299,0.298,0.296,0.292,0.289,0.287,0.282,0.278,0.273,0.269,0.264,0.260,0.256,0.251,0.243,0.236,0.229,0.221,0.212,0.207,0.200,0.194,0.189,0.184,0.176,0.167,0.156,0.144,0.132,0.124,0.116,0.107,0.099,0.092,0.086,0.081,0.078,0.076,0.074,0.073,0.072,0.072,0.072,0.073,0.074,0.076,0.077,0.079,0.080,0.081,0.082,0.083,0.083,0.084,0.086,0.086,0.082,0.077,0.068,0.058,0.049,0.043,0.041,0.041,0.042,0.041,0.038,0.033,0.029,0.024,0.022,0.026,0.029,0.032,0.037,0.041,0.042,0.046,0.050,0.053,0.057,0.060,0.061,0.062,0.063,0.064,0.066,0.067,0.067,0.066,0.064,0.064,0.064,0.064];
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const clamp01 = (t) => Math.min(1, Math.max(0, t));
+  const smooth = (t) => { t = clamp01(t); return t * t * (3 - 2 * t); };
+  const sampleTable = (tbl, f) => {
+    const i = Math.min(tbl.length - 1, Math.max(0, Math.floor(f)));
+    const j = Math.min(tbl.length - 1, i + 1);
+    return lerp(tbl[i], tbl[j], clamp01(f - i));
+  };
 
   function getBestLoadedImage(exactIdx) {
     const target = Math.min(TOTAL_FRAMES - 1, Math.max(0, Math.round(exactIdx)));
@@ -142,66 +142,139 @@ document.addEventListener('DOMContentLoaded', () => {
     return frameImages[0] || null;
   }
 
-  // Draw frame on canvas with dynamic mobile re-framing
-  function render(progress) {
-    if (!ctx || !canvas) return;
-    const p = Math.min(1, Math.max(0, progress));
-
-    // Extended timeline mapping:
-    // Scroll 0% -> 42%: Character turn & cup lift (frames 1 to 65)
-    // Scroll 42% -> 100%: Lingering smoke effect (frames 66 to 96)
+  // Desktop frame mapping (unchanged): global scroll progress -> frame
+  function desktopFrameFromProgress(p) {
     let frameProgress;
     if (p <= 0.42) {
       frameProgress = (p / 0.42) * (65 / TOTAL_FRAMES);
     } else {
       frameProgress = (65 / TOTAL_FRAMES) + ((p - 0.42) / 0.58) * (1 - (65 / TOTAL_FRAMES));
     }
+    return frameProgress * (TOTAL_FRAMES - 1);
+  }
 
-    const exactFrame = frameProgress * (TOTAL_FRAMES - 1);
-    const img = getBestLoadedImage(exactFrame);
+  // Mobile frame mapping: anchored to section positions so each phase shows the right part of the clip
+  //   hero -> frame 0 (standing, arms crossed) | story -> he walks away and comes back
+  //   coffee section top -> he is back holding the mug | coffee hold -> steam builds
+  let mobileKeys = [[0, 0], [1, TOTAL_FRAMES - 1]];
+  function computeMobileKeys() {
+    const vh = window.innerHeight;
+    const topOf = (sel) => {
+      const el = document.querySelector(sel);
+      return el ? el.getBoundingClientRect().top + window.scrollY : 0;
+    };
+    const glance = topOf('#glance-section');
+    const story = topOf('#story-section');
+    const chairEl = document.getElementById('chair-section');
+    const chair = topOf('#chair-section');
+    const chairScroll = chairEl ? Math.max(1, chairEl.offsetHeight - vh) : vh;
+    mobileKeys = [
+      [0, 0],
+      [glance * 0.35, 6],
+      [glance, 34],
+      [story, 56],
+      [story + (chair - story) * 0.82, 82],
+      [chair + chairScroll * 0.30, 88],
+      [chair + chairScroll, TOTAL_FRAMES - 1]
+    ];
+  }
+  function mobileFrameFromY(y) {
+    const k = mobileKeys;
+    if (y <= k[0][0]) return k[0][1];
+    for (let i = 1; i < k.length; i++) {
+      if (y <= k[i][0]) {
+        const t = (y - k[i - 1][0]) / Math.max(1, k[i][0] - k[i - 1][0]);
+        return lerp(k[i - 1][1], k[i][1], t);
+      }
+    }
+    return k[k.length - 1][1];
+  }
 
-    if (!img || !img.complete || !img.naturalWidth) return;
-
-    const cw = canvas.width;
-    const ch = canvas.height;
+  function drawDesktop(img, cw, ch) {
     const iw = img.naturalWidth;
     const ih = img.naturalHeight;
-
-    // Cover scale factor
     const scale = Math.max(cw / iw, ch / ih);
     const nw = Math.ceil(iw * scale);
     const nh = Math.ceil(ih * scale);
+    const ox = Math.floor((cw - nw) / 2);
+    const oy = Math.floor((ch - nh) / 2);
+    ctx.drawImage(img, ox, oy, nw, nh);
+  }
 
-    let ox, oy;
-    const currentlyMobile = window.innerWidth < 768;
+  // Mobile "portfolio cover" framing: the clip sits in the top of the screen and fades into #060b18,
+  // so text lives on a clean dark area in the bottom ~40% and never covers his face.
+  function drawMobile(img, cw, ch, f) {
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+    // Image height relative to the screen: 1.0 for hero/glance/story, 0.66 for the coffee moment
+    // (so Simanto + mug fit inside the top ~60%).
+    const coffee = smooth((f - 56) / (80 - 56));
+    // Form phase (last frames): ease him + mug a little higher/smaller so the heading and form never cover the mug
+    const formPhase = smooth((f - 88) / 7);
+    const s = lerp(lerp(1.0, 0.66, coffee), 0.62, formPhase);
+    // Where the top of his head should land on screen
+    let headTarget = f <= 12 ? 0.13 : (f <= 40 ? lerp(0.13, 0.10, (f - 12) / 28) : lerp(0.10, 0.085, clamp01((f - 40) / 40)));
+    headTarget = lerp(headTarget, 0.05, formPhase);
+    const nh = Math.ceil(ch * s);
+    const nw = Math.ceil(iw * (nh / ih));
+    // In the coffee frames bias slightly right so the mug (right of him) is never clipped
+    const focusX = sampleTable(FOCUS_X, f) + 0.014 * smooth((f - 74) / 8);
+    let ox = Math.round(cw / 2 - nw * focusX);
+    ox = Math.min(0, Math.max(cw - nw, ox));
+    let oy = Math.round(headTarget * ch - sampleTable(HEAD_Y, f) * nh);
+    oy = Math.min(Math.round(ch * 0.08), oy);
 
-    if (currentlyMobile) {
-      // 1. Mobile Re-framing: Keep Simanto framed in top ~55% of screen & centered per scroll phase
-      const focusX = getFrameFocusX(exactFrame);
-      ox = Math.floor((cw / 2) - (nw * focusX));
-      ox = Math.min(0, Math.max(cw - nw, ox));
-      // Head sits ~12-15% from top of screen:
-      // In 1280x720 video, head starts at y=48 (6.7%).
-      // oy = Math.floor(ch * 0.06) places head at (0.067 + 0.06) = 12.7% from top of screen!
-      oy = Math.floor(ch * 0.06);
-    } else {
-      // Desktop: Keep exactly as original centered design without changing desktop look
-      ox = Math.floor((cw - nw) / 2);
-      oy = Math.floor((ch - nh) / 2);
+    ctx.fillStyle = '#060b18';
+    ctx.fillRect(0, 0, cw, ch);
+    ctx.drawImage(img, ox, oy, nw, nh);
+    if (oy > 0) {
+      // Extend the backdrop above the frame seamlessly (stretch the top rows of the frame)
+      const srcX = (-ox) * (iw / nw);
+      const srcW = cw * (iw / nw);
+      ctx.drawImage(img, srcX, 0, srcW, 3, 0, 0, cw, oy + 1);
     }
+    // Soft fade of the frame's bottom edge into the dark text area
+    const bottom = oy + nh;
+    const fadeH = ch * 0.2;
+    const g = ctx.createLinearGradient(0, bottom - fadeH, 0, bottom);
+    g.addColorStop(0, 'rgba(6, 11, 24, 0)');
+    g.addColorStop(1, 'rgba(6, 11, 24, 1)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, bottom - fadeH, cw, fadeH + 1);
+  }
+
+  // Draw the current frame
+  let lastFooterFade = -1;
+  function render(progressOrY) {
+    if (!ctx || !canvas) return;
+    const currentlyMobile = window.innerWidth < 768;
+    const exactFrame = currentlyMobile
+      ? mobileFrameFromY(smoothY)
+      : desktopFrameFromProgress(Math.min(1, Math.max(0, smoothProgress)));
+    const img = getBestLoadedImage(exactFrame);
+    if (!img || !img.complete || !img.naturalWidth) return;
 
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(img, ox, oy, nw, nh);
+    if (currentlyMobile) {
+      drawMobile(img, canvas.width, canvas.height, exactFrame);
+    } else {
+      drawDesktop(img, canvas.width, canvas.height);
+    }
 
-    // Behind footer, don't show the zoomed, pixelated video; fade out canvas smoothly before footer
-    if (canvas) {
-      if (p >= 0.86) {
-        const fade = Math.max(0, 1 - (p - 0.86) / 0.08);
-        canvas.style.opacity = fade.toFixed(3);
-      } else {
-        canvas.style.opacity = '1';
-      }
+    // Never show the zoomed video behind the footer: fade the canvas to the plain dark background
+    let fade = 1;
+    if (currentlyMobile && footerEl) {
+      const ft = footerEl.getBoundingClientRect().top / window.innerHeight;
+      fade = clamp01((ft - 0.25) / 0.6);
+    } else if (!currentlyMobile) {
+      // Desktop: unchanged behaviour (canvas fades out over the last part of the page)
+      const p = Math.min(1, Math.max(0, smoothProgress));
+      fade = p >= 0.86 ? Math.max(0, 1 - (p - 0.86) / 0.08) : 1;
+    }
+    if (fade !== lastFooterFade) {
+      canvas.style.opacity = fade.toFixed(3);
+      lastFooterFade = fade;
     }
   }
 
@@ -225,7 +298,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Soft lerp interpolation
     const lerpSpeed = isTouch ? 0.15 : 0.10;
     smoothProgress += (targetProgress - smoothProgress) * lerpSpeed;
-    render(smoothProgress);
+    smoothY += (window.scrollY - smoothY) * lerpSpeed;
+    if (Math.abs(window.scrollY - smoothY) < 0.5) smoothY = window.scrollY;
+    render();
     requestAnimationFrame(raf);
   }
   requestAnimationFrame(raf);
@@ -320,14 +395,38 @@ document.addEventListener('DOMContentLoaded', () => {
     // Section 3: Story Progression
     const storyLines = document.querySelectorAll('.story-line');
     const progressIndicator = document.getElementById('story-indicator');
+    const setActiveLine = (activeIndex) => {
+      storyLines.forEach((line, index) => {
+        line.classList.toggle('active', index === activeIndex);
+      });
+    };
 
-    if (storyLines.length > 0) {
+    if (storyLines.length > 0 && isMobile) {
+      // Mobile: the story is pinned (CSS sticky) and shows ONE line at a time in the bottom area.
+      // Lines advance over the first ~84% of the section, then the whole block fades out completely
+      // before the coffee moment starts, so nothing (e.g. 'patients.') lingers over the next phase.
+      const storyContainer = document.querySelector('.story-lines-container');
+      ScrollTrigger.create({
+        trigger: '#story-section',
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => {
+          const p = self.progress;
+          const linesP = Math.min(0.999, p / 0.84);
+          setActiveLine(Math.floor(linesP * storyLines.length));
+          const out = p <= 0.86 ? 1 : Math.max(0, 1 - (p - 0.86) / 0.1);
+          storyContainer.style.opacity = out.toFixed(3);
+        },
+        onLeave: () => { storyContainer.style.opacity = '0'; },
+        onLeaveBack: () => { storyContainer.style.opacity = '1'; setActiveLine(0); }
+      });
+    } else if (storyLines.length > 0) {
       ScrollTrigger.create({
         trigger: '#story-section',
         start: 'top 60%',
         end: 'bottom 40%',
         onLeave: () => {
-          // Immediately hide all story lines when leaving story section downwards so nothing bleeds into coffee section
+          // Hide all story lines when leaving the story section downwards so nothing bleeds into the next section
           storyLines.forEach((line) => {
             line.classList.remove('active');
             line.style.opacity = '0';
@@ -351,15 +450,8 @@ document.addEventListener('DOMContentLoaded', () => {
             storyLines.length - 1,
             Math.floor(progress * storyLines.length)
           );
-
-          storyLines.forEach((line, index) => {
-            line.style.opacity = '';
-            if (index === activeIndex) {
-              line.classList.add('active');
-            } else {
-              line.classList.remove('active');
-            }
-          });
+          storyLines.forEach((line) => { line.style.opacity = ''; });
+          setActiveLine(activeIndex);
 
           if (progressIndicator) {
             const travelHeight = 380 - (380 * 0.25);
@@ -370,37 +462,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Section 4: Pull Up a Chair Entrance
-    if (window.innerWidth < 768) {
-      // Mobile Coffee Moment:
-      // Clean screen hold: Simanto + mug fully visible in top ~60% for a short scroll hold
-      // Then heading & line fade in BELOW the mug, then mug-shaped glass form
-      gsap.set('.chair-title, .chair-desc', { opacity: 0, y: 16 });
-      gsap.set('.mug-form-wrapper', { opacity: 0, y: 24 });
+    if (isMobile) {
+      // Mobile Coffee Moment (content is pinned with CSS sticky inside a tall section):
+      //  0.00-0.30  clean hold: Simanto + mug fully visible in the top ~60%, no text at all
+      //  0.30-0.55  heading + line fade in BELOW the mug
+      //  0.55-0.85  mug-shaped glass booking form rises in under them
+      gsap.set('.chair-title, .chair-desc', { opacity: 0, y: 18 });
+      gsap.set('.mug-form-wrapper', { opacity: 0, y: 40 });
 
       const chairTl = gsap.timeline({
         scrollTrigger: {
           trigger: '#chair-section',
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 0.5
+          scrub: 0.4
         }
       });
 
       chairTl
-        .to({}, { duration: 0.35 }) // Clean scroll hold for Simanto + mug (no text over him or mug)
-        .to('.chair-title, .chair-desc', { opacity: 1, y: 0, duration: 0.30, ease: 'power2.out' })
-        .to('.mug-form-wrapper', { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' });
+        .to({}, { duration: 0.30 })
+        .to('.chair-title, .chair-desc', { opacity: 1, y: 0, duration: 0.25, ease: 'power2.out' })
+        .to('.mug-form-wrapper', { opacity: 1, y: 0, duration: 0.30, ease: 'power2.out' })
+        .to({}, { duration: 0.15 });
 
-      // Hide mobile burger button while over form so it never overlaps inputs or Reserve button
-      ScrollTrigger.create({
-        trigger: '#chair-section',
-        start: 'top 40%',
-        end: 'bottom 20%',
-        onEnter: () => gsap.to('#mobile-burger', { opacity: 0, pointerEvents: 'none', duration: 0.2 }),
-        onLeave: () => gsap.to('#mobile-burger', { opacity: 1, pointerEvents: 'auto', duration: 0.2 }),
-        onEnterBack: () => gsap.to('#mobile-burger', { opacity: 0, pointerEvents: 'none', duration: 0.2 }),
-        onLeaveBack: () => gsap.to('#mobile-burger', { opacity: 1, pointerEvents: 'auto', duration: 0.2 })
-      });
+      // Hide the fixed burger while the form is on screen so it never overlaps inputs / Reserve My Seat
+      const burger = document.getElementById('mobile-burger');
+      if (burger) {
+        ScrollTrigger.create({
+          trigger: '#chair-section',
+          start: 'top 40%',
+          endTrigger: '#footer-section',
+          end: 'top 5%',
+          toggleClass: { targets: burger, className: 'is-hidden' }
+        });
+      }
     } else {
       gsap.fromTo('.chair-content',
         { opacity: 0, y: 35 },
@@ -416,6 +511,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       );
     }
+
+    ScrollTrigger.addEventListener('refresh', computeMobileKeys);
 
     // Section 5: Footer Reveal
     gsap.fromTo('.footer-panel',

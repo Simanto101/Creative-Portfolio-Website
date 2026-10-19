@@ -3,7 +3,7 @@
    Theme: Deep Navy to Luminous Ice Blue Glassmorphism ($10k Agency Look)
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Unbounded:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+/* Fonts are loaded once via <link> in index.html (no duplicate render-blocking @import) */
 
 :root {
   /* Color Palette */
@@ -1228,392 +1228,410 @@ button {
   }
 }
 
-@media (max-width: 768px) {
-  /* 1. Mobile Sections: Content in bottom ~40%, top ~60% clear for Simanto */
+/* ==========================================================================
+   PHONES (<768px) — "portfolio cover" layout
+   The canvas (main.js) draws the clip in the top of the screen and fades it into #060b18,
+   all text lives in the bottom ~40% on a fixed dark gradient. Desktop is untouched.
+   ========================================================================== */
+@media (max-width: 767.98px) {
+  /* 'clip' (not 'hidden') so the page itself stays the scroller and position:sticky works */
+  html, body {
+    overflow-x: clip !important;
+  }
+
+  /* Fixed bottom gradient (transparent -> #060b18) that text always sits on */
+  .stage-vignette {
+    background: linear-gradient(180deg,
+      rgba(6, 11, 24, 0) 0%,
+      rgba(6, 11, 24, 0) 52%,
+      rgba(6, 11, 24, 0.55) 62%,
+      rgba(6, 11, 24, 0.92) 74%,
+      #060b18 84%,
+      #060b18 100%);
+  }
+
   .scene-section {
-    padding: 0 16px 20px 16px !important;
-    min-height: 100vh !important;
-    min-height: 100dvh !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-end !important; /* Bottom ~40% */
-    align-items: stretch !important;
-    /* Smooth dark gradient: 0-48% transparent (face/shoulders), fades to #060b18 at 85% */
-    background: linear-gradient(180deg, transparent 0%, transparent 48%, rgba(6, 11, 24, 0.38) 60%, rgba(6, 11, 24, 0.85) 85%, #060b18 100%) !important;
-    box-sizing: border-box !important;
-    position: relative !important;
+    padding: 0 18px 22px 18px;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+    background: none;
   }
 
   .scene-inner {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
-  /* 2. No Card Backgrounds on Mobile - Content sits cleanly over the smooth gradient */
   .hero-content, .glance-content, .story-content {
-    background: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 3px !important;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* 3. Eyebrow */
+  /* ---------- 1. HERO ---------- */
+  .hero-content {
+    gap: 10px;
+  }
+
   .eyebrow {
-    font-size: 10.5px !important;
-    letter-spacing: 0.12em !important;
-    white-space: normal !important;
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 5px !important;
-    line-height: 1.35 !important;
-    margin-bottom: 2px !important;
+    font-size: clamp(9px, 2.6vw, 11px);
+    letter-spacing: 0.14em;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    gap: 8px;
   }
 
   .eyebrow::before {
-    width: 14px !important;
-    margin-right: 2px !important;
+    width: 16px;
   }
 
-  /* 4. Exact Requested Hero Typography Sizes: "Simanto" 56px, "MITRO" 30px, headline 16px */
   .hero-name-wrapper {
-    margin: 1px 0 !important;
+    margin: 0;
   }
 
   .hero-name-serif {
-    font-size: 56px !important;
-    line-height: 0.92 !important;
-    letter-spacing: -0.01em !important;
+    font-size: clamp(46px, 13.6vw, 58px);
+    line-height: 0.95;
   }
 
   .hero-name-outline {
-    font-size: 30px !important;
-    line-height: 0.95 !important;
-    letter-spacing: 0.08em !important;
-    margin-top: 1px !important;
+    font-size: clamp(25px, 7.4vw, 31px);
+    letter-spacing: 0.1em;
+    margin-top: 0;
+    margin-left: 2px;
+    -webkit-text-stroke: 1.2px rgba(255, 255, 255, 0.9);
   }
 
   .hero-tagline {
-    font-size: 16px !important;
-    line-height: 1.42 !important;
-    margin: 4px 0 6px 0 !important;
-    color: var(--text-secondary) !important;
+    font-size: 15.5px;
+    line-height: 1.45;
+    max-width: 100%;
   }
 
-  /* 5. Hero Pills: Compact in one row if they fit, otherwise stacked small */
   .hero-pills {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    gap: 5px !important;
-    width: 100% !important;
-    margin-top: 2px !important;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 0;
   }
 
   .glass-pill {
-    display: inline-flex !important;
-    align-items: center !important;
-    padding: 5px 10px !important;
-    font-size: 11px !important;
-    gap: 5px !important;
-    border-radius: 999px !important;
-    white-space: nowrap !important;
-    flex: 1 1 auto !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
+    padding: 6px 12px;
+    font-size: 12px;
+    gap: 7px;
+    white-space: nowrap;
+    max-width: 100%;
   }
 
   .pill-icon {
-    width: 13px !important;
-    height: 13px !important;
+    width: 14px;
+    height: 14px;
   }
 
-  /* 6. As Featured In Strip: Full first name visible, fade masks on both edges */
   .featured-strip {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 6px 10px !important;
-    margin-top: 6px !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 8px !important;
-    background: rgba(14, 25, 48, 0.45) !important;
-    border-radius: 10px !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
+    width: 100%;
+    max-width: 100%;
+    padding: 8px 0 8px 12px;
+    margin-top: 2px;
+    gap: 0;
+    border-radius: 12px;
+    overflow: hidden;
   }
 
   .featured-label {
-    font-size: 8px !important;
-    letter-spacing: 0.12em !important;
-    flex-shrink: 0 !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
-    padding-right: 8px !important;
+    font-size: 8.5px;
+    letter-spacing: 0.14em;
+    flex-shrink: 0;
+    padding-right: 10px;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
   }
 
   .featured-outlets {
-    display: flex !important;
-    align-items: center !important;
-    flex: 1 !important;
-    overflow: hidden !important;
-    position: relative !important;
-    /* Soft fade masks on both edges */
-    mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%) !important;
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%) !important;
+    display: block;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    padding-left: 14px; /* first outlet starts fully visible, right of the fade */
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%);
   }
 
   .marquee-track {
-    display: flex !important;
-    align-items: center !important;
-    gap: 22px !important;
-    padding-left: 8px !important; /* Starts fully visible, no cut-off 'hom Alo' */
-    animation: marqueeScroll 14s linear infinite !important;
+    display: flex;
+    width: max-content;
+    animation: marqueeScroll 16s linear 1.6s infinite;
     will-change: transform;
-    white-space: nowrap !important;
-  }
-
-  @keyframes marqueeScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
   }
 
   .outlet-item {
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    flex-shrink: 0 !important;
+    font-size: 12px;
+    padding-right: 26px; /* spacing lives inside items so -50% loops seamlessly */
+    flex-shrink: 0;
   }
 
-  /* 7. Section 2 (At a Glance): 2x2 Grid Inside Screen, No Cut-Offs, No Big Empty Space */
-  .glance-scene {
-    justify-content: flex-end !important;
-    padding-bottom: 18px !important;
-    background: linear-gradient(180deg, transparent 0%, transparent 40%, rgba(6, 11, 24, 0.42) 55%, rgba(6, 11, 24, 0.88) 75%, #060b18 90%, #060b18 100%) !important;
+  @keyframes marqueeScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ---------- 2. AT A GLANCE: 2x2 compact grid, fully on screen ---------- */
+  .glance-content {
+    gap: 6px;
   }
 
   .scene-title {
-    font-size: 21px !important;
-    margin-bottom: 4px !important;
-    line-height: 1.2 !important;
+    font-size: 30px;
+    line-height: 1.1;
+    margin-bottom: 6px;
   }
 
   .cards-deck {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8px !important;
-    width: 100% !important;
-    margin-top: 4px !important;
-    padding: 0 !important;
-    overflow: visible !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-top: 0;
+    perspective: none;
   }
 
-  .deck-card {
-    min-height: 118px !important;
-    padding: 10px 10px 10px 10px !important;
-    background: rgba(14, 25, 48, 0.78) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 14px !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.6) !important;
+  .deck-card,
+  .deck-card:nth-child(1),
+  .deck-card:nth-child(2),
+  .deck-card:nth-child(3),
+  .deck-card:nth-child(4) {
+    min-height: 0 !important;
+    padding: 12px 12px 11px 12px;
+    border-radius: 16px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(14, 25, 48, 0.82) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.7);
     transform: none !important;
     animation: none !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    width: 100% !important;
-    max-width: 100% !important;
   }
 
-  .deck-card .card-top {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    margin-bottom: 2px !important;
+  .deck-card:hover {
+    transform: none !important;
   }
 
-  .deck-card .card-icon-wrap {
-    width: 26px !important;
-    height: 26px !important;
-    border-radius: 7px !important;
+  .card-top {
+    margin-bottom: 8px;
   }
 
-  .deck-card .card-icon-wrap svg {
-    width: 13px !important;
-    height: 13px !important;
+  .card-icon-wrap {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
   }
 
-  .deck-card .card-number {
-    font-size: 10px !important;
-    opacity: 0.5 !important;
+  .card-icon-wrap svg {
+    width: 16px;
+    height: 16px;
   }
 
-  .deck-card .card-title {
-    font-size: 12.5px !important;
-    font-weight: 700 !important;
-    line-height: 1.2 !important;
-    margin-bottom: 2px !important;
-    color: #ffffff !important;
+  .card-number {
+    font-size: 10px;
   }
 
-  .deck-card .card-desc {
-    font-size: 10px !important;
-    line-height: 1.25 !important;
-    color: var(--text-secondary) !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
+  .card-body {
+    gap: 4px;
   }
 
-  .deck-card .card-link {
-    font-size: 10.5px !important;
-    font-weight: 600 !important;
-    color: var(--accent-cyan) !important;
-    margin-top: 2px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 3px !important;
+  .card-title {
+    font-size: 13.5px;
+    line-height: 1.2;
   }
 
-  /* 8. Section 3 (Story): Overflow Hidden, No bleed into Coffee section */
+  .card-desc {
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+
+  .card-link {
+    margin-top: 8px;
+    font-size: 9.5px;
+  }
+
+  /* ---------- 3. STORY: pinned, one line at a time in the bottom area ---------- */
   .story-scene {
-    overflow: hidden !important;
-    justify-content: flex-end !important;
-    padding-bottom: 24px !important;
-    background: linear-gradient(180deg, transparent 0%, transparent 45%, rgba(6, 11, 24, 0.40) 60%, rgba(6, 11, 24, 0.85) 80%, #060b18 95%, #060b18 100%) !important;
+    display: block;
+    min-height: 240vh;
+    padding: 0 18px;
+    overflow: clip;
+  }
+
+  .story-scene .scene-inner {
+    height: 240vh;
+  }
+
+  .story-content {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    justify-content: flex-end;
+    padding-bottom: 14vh;
   }
 
   .story-progress-rail {
-    display: none !important;
+    display: none;
   }
 
   .story-lines-container {
-    width: 100% !important;
-    gap: 10px !important;
+    display: grid;
+    width: 100%;
+    gap: 0;
+    transition: opacity 0.25s linear;
   }
 
-  .story-line {
-    font-size: 14px !important;
-    line-height: 1.45 !important;
-    transform: none !important;
+  .story-line,
+  .story-line.brand-heading {
+    grid-area: 1 / 1;
+    align-self: end;
+    font-size: 21px;
+    line-height: 1.4;
+    color: #ffffff;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.45s var(--ease-out-expo), transform 0.45s var(--ease-out-expo);
   }
 
   .story-line.active {
-    font-size: 16px !important;
-    transform: none !important;
+    opacity: 1;
+    transform: translateY(0);
+    font-weight: 500;
   }
 
   .story-line.brand-heading {
-    font-size: 21px !important;
+    font-size: 32px;
   }
 
-  /* 9. Section 4 (Coffee Moment & Pull Up a Chair): Sticky Hold Sequence & Below Mug Form */
+  /* ---------- 4. COFFEE MOMENT + FORM: pinned sequence ---------- */
   .chair-scene {
-    position: relative !important;
-    min-height: 170vh !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-end !important;
-    padding: 0 16px 20px 16px !important;
-    background: linear-gradient(180deg, transparent 0%, transparent 45%, rgba(6, 11, 24, 0.40) 60%, rgba(6, 11, 24, 0.88) 80%, #060b18 100%) !important;
+    display: block;
+    min-height: 260vh;
+    padding: 0 18px;
+  }
+
+  .chair-scene .scene-inner {
+    height: 260vh;
   }
 
   .chair-content {
-    position: sticky !important;
-    bottom: 18px !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 3px !important;
-    box-sizing: border-box !important;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    max-width: 100%;
+    margin: 0;
+    justify-content: flex-end;
+    gap: 6px;
+    padding-bottom: 16px;
   }
 
   .chair-title {
-    font-size: 19px !important;
-    line-height: 1.25 !important;
-    margin-bottom: 2px !important;
+    font-size: clamp(17px, 4.85vw, 20px);
+    line-height: 1.25;
   }
 
   .chair-desc {
-    font-size: 12.5px !important;
-    line-height: 1.35 !important;
-    margin-bottom: 6px !important;
+    font-size: clamp(11.5px, 3.15vw, 13px);
+    line-height: 1.45;
+    margin-bottom: 12px;
   }
 
   .mug-form-wrapper {
-    max-width: 100% !important;
-    width: 100% !important;
-    margin-top: 2px !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
+    max-width: 100%;
+    width: 100%;
+    margin-top: 6px;
   }
 
   .steam-emitter {
-    top: -30px !important;
-    height: 34px !important;
+    top: -30px;
+    width: 90px;
+    height: 34px;
   }
 
   .mug-body {
-    padding: 14px 12px 16px 12px !important;
-    border-radius: 16px !important;
-    gap: 8px !important;
-    background: rgba(14, 25, 48, 0.80) !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    padding: 12px 14px 16px 14px;
+    border-radius: 14px 14px 34px 34px;
+    gap: 9px;
+  }
+
+  .mug-header {
+    font-size: 14px;
+    padding-bottom: 4px;
   }
 
   .form-row {
-    grid-template-columns: 1fr !important;
-    gap: 6px !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .form-group[style] {
+    margin-top: 0 !important;
+  }
+
+  .form-row[style] {
+    margin-top: 0 !important;
+  }
+
+  #chair-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .glass-input {
-    width: 100% !important;
-    font-size: 12.5px !important;
-    padding: 9px 11px !important;
-    box-sizing: border-box !important;
+    font-size: 16px; /* >=16px stops mobile browsers from zooming on focus */
+    padding: 8px 12px;
+    border-radius: 10px;
   }
 
   .btn-reserve {
-    padding: 10px 14px !important;
-    font-size: 13px !important;
-    width: 100% !important;
+    padding: 11px 16px;
+    font-size: 14px;
+    margin-top: 2px;
   }
 
-  /* 10. Footer Panel & Clean Dark Gradient Background (No pixelated video behind) */
+  /* Fixed burger hides while the form is on screen */
+  .mobile-nav-toggle {
+    transition: opacity 0.25s ease;
+  }
+
+  .mobile-nav-toggle.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ---------- 5. FOOTER: plain dark gradient, no video behind ---------- */
   .footer-section {
-    position: relative !important;
-    width: 100% !important;
-    background: #040814 !important;
-    background: linear-gradient(180deg, #040814 0%, #060b18 45%, #020409 100%) !important;
-    z-index: 30 !important;
-    padding: 60px 16px 36px 16px !important;
+    background: linear-gradient(180deg, #060b18 0%, #050916 45%, #020409 100%);
+    z-index: 30;
+    padding: 48px 16px 32px 16px;
   }
 
   .footer-panel {
-    padding: 22px 14px !important;
-    border-radius: 16px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    padding: 24px 18px;
+    border-radius: 18px;
+    gap: 28px !important;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(14, 25, 48, 0.6) 100%);
+  }
+
+  .footer-heading {
+    font-size: 30px;
+  }
+
+  .footer-copyright {
+    margin-top: 28px;
+    font-size: 10px;
   }
 }
 
