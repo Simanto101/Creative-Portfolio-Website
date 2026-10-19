@@ -1732,7 +1732,7 @@ body.menu-open { overflow: hidden; }
     padding: 6px 12px;
     font-size: 12px;
     gap: 7px;
-    white-space: nowrap;
+    white-space: normal;
     max-width: 100%;
   }
 
@@ -2032,6 +2032,13 @@ body.menu-open { overflow: hidden; }
   .footer-copyright {
     margin-top: 28px;
     font-size: 10px;
+  }
+}
+
+/* Extra-narrow phones: stack the 2-column form rows so fields never get cramped */
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns: 1fr;
   }
 }
 
