@@ -360,3 +360,23 @@
     margin: 32px auto 56px;
   }
 }
+
+/* ==========================================================================
+   CALENDLY EMBED (coffee.html)
+   The booking iframe is always light, so give it a clean rounded frame
+   instead of letting it sit raw inside the dark mug card.
+   ========================================================================== */
+.calendly-inline-widget {
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.85);
+}
+
+.calendly-inline-widget iframe {
+  border-radius: 14px;
+}
+
+@media (max-width: 620px) {
+  .calendly-inline-widget { height: 680px !important; }
+}
