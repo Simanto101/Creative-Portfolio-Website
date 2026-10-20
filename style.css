@@ -2067,16 +2067,8 @@ body.menu-open { overflow: hidden; }
    HERO v2 — SUBJECT-TRACKED CINEMATIC STAGE
    The film sweeps the subject across the frame; the text block travels the
    opposite way, dissolves through the crossover, then re-forms on the far side.
+   Every per-frame value is written by main.js as an inline transform/opacity.
    ========================================================================== */
-
-:root {
-  --hero-side: 0;
-  --hero-fade: 1;
-  --hero-travel: 0px;
-  --hero-away: 0;
-  --hero-exit: 0;
-  --page-progress: 0;
-}
 
 /* --- Cinematic film grain over the whole experience --- */
 body::after {
@@ -2091,7 +2083,6 @@ body::after {
   opacity: 0.045;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>");
   background-size: 180px 180px;
-  animation: grainDrift 7s steps(6) infinite;
 }
 
 @keyframes grainDrift {
@@ -2113,7 +2104,7 @@ body::after {
   z-index: 130;
   pointer-events: none;
   transform-origin: 0 50%;
-  transform: scaleX(var(--page-progress, 0));
+  transform: scaleX(0);
   background: linear-gradient(90deg, rgba(56, 189, 248, 0.9), rgba(186, 230, 253, 0.95));
   opacity: 0.7;
 }
@@ -2148,25 +2139,38 @@ body::after {
     max-width: 1320px;
   }
 
-  /* Contrast pool that travels with the copy (soft on every edge) */
+  /* Contrast pools: two static gradients that cross-fade (no per-frame repaint) */
   .hero-scrim {
     position: absolute;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background: radial-gradient(58% 78% at calc(70% - var(--hero-side) * 40%) 50%,
-      rgba(4, 8, 20, 0.94) 0%,
-      rgba(4, 8, 20, 0.82) 34%,
-      rgba(4, 8, 20, 0.42) 62%,
-      rgba(4, 8, 20, 0) 82%);
-    opacity: calc(0.45 + 0.55 * var(--hero-fade));
+    opacity: 0;
+    will-change: opacity;
+    contain: paint;
   }
 
-  /* The copy itself: opposite the subject, dissolving at the crossover */
+  .hero-scrim-right {
+    background: radial-gradient(60% 82% at 74% 50%,
+      rgba(4, 8, 20, 0.95) 0%,
+      rgba(4, 8, 20, 0.84) 34%,
+      rgba(4, 8, 20, 0.4) 62%,
+      rgba(4, 8, 20, 0) 84%);
+  }
+
+  .hero-scrim-left {
+    background: radial-gradient(60% 82% at 26% 50%,
+      rgba(4, 8, 20, 0.95) 0%,
+      rgba(4, 8, 20, 0.84) 34%,
+      rgba(4, 8, 20, 0.4) 62%,
+      rgba(4, 8, 20, 0) 84%);
+  }
+
+  /* The copy: driven from JS each frame (transform + opacity only) */
   .hero-content {
-    transform: translate3d(calc(var(--hero-travel) * -1 * var(--hero-side)), calc(var(--hero-away) * -34px), 0);
-    opacity: calc(var(--hero-fade) * (1 - var(--hero-exit, 0)));
-    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
   }
 
   /* Outlets: a static row on desktop (the marquee is a compact-screen affordance) */
@@ -2269,7 +2273,7 @@ body::after {
     align-items: center;
     gap: 10px;
     transform: translateX(-50%);
-    opacity: calc(1 - var(--hero-away));
+    opacity: 1;
     pointer-events: none;
   }
 
@@ -2337,10 +2341,26 @@ body::after {
   .hero-cue { display: none; }
   .hero-content {
     transform: none !important;
-    opacity: 1 !important;
+    will-change: opacity;
   }
 
   .eyebrow-line { display: none; }
+
+  /* Hand the film off to the first dark section without a hard horizontal cut.
+     Ends at the exact alpha the glance section starts on, so the two meet seamlessly. */
+  .hero-scene::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 30%;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(6, 11, 24, 0) 0%, rgba(6, 11, 24, 0.34) 58%, rgba(6, 11, 24, 0.88) 100%);
+  }
+
+  .hero-scene .scene-inner { position: relative; z-index: 1; }
 
   .hero-name-wrapper { position: relative; }
 
@@ -2375,11 +2395,12 @@ body::after {
   /* Keep the outlets inside the mask on phones (no hard cut at the label) */
   .featured-outlets { padding-left: 0; }
 
-  /* Cards sit over the face on portrait screens: sink the top of the section */
+  /* Cards sit over the face on portrait screens: sink the top of the section.
+     Starts at the hero hand-off alpha so the seam is invisible. */
   .glance-scene {
     background: linear-gradient(180deg,
-      rgba(6, 11, 24, 0.98) 0%,
-      rgba(6, 11, 24, 0.9) 28%,
+      rgba(6, 11, 24, 0.88) 0%,
+      rgba(6, 11, 24, 0.82) 26%,
       rgba(6, 11, 24, 0.34) 60%,
       rgba(6, 11, 24, 0) 82%);
   }
@@ -2395,13 +2416,42 @@ body::after {
   .marquee-track { animation: none; }
   .outlet-item[aria-hidden="true"] { display: none; }
   .featured-outlets { overflow: visible; -webkit-mask-image: none; mask-image: none; }
-}
 
-/* Taller portrait tablets get a larger name than a phone */
-@media (orientation: portrait) and (min-width: 768px) and (max-width: 1179.98px) {
-  .hero-name-serif { font-size: clamp(58px, 8.4vw, 88px); }
-  .hero-name-outline { font-size: clamp(28px, 4.2vw, 42px); letter-spacing: 0.14em; }
+  /* Keep copy from stretching edge to edge on an 834px-wide screen */
+  .hero-content { max-width: 640px; }
+  .hero-name-serif { font-size: clamp(60px, 8.6vw, 92px); }
+  .hero-name-outline { font-size: clamp(30px, 4.4vw, 46px); letter-spacing: 0.13em; }
   .hero-tagline { font-size: clamp(16px, 2.2vw, 20px); }
+
+  /* Deck: two big cards per row instead of two tiny ones floating in space */
+  #glance-section .scene-inner { max-width: 700px; }
+  .glance-content { max-width: 100%; }
+  .scene-title { font-size: clamp(36px, 4.8vw, 52px); }
+  .cards-deck { gap: 18px !important; }
+  .deck-card,
+  .deck-card:nth-child(1),
+  .deck-card:nth-child(2),
+  .deck-card:nth-child(3),
+  .deck-card:nth-child(4) {
+    min-height: 214px !important;
+    padding: 22px 22px 20px 22px !important;
+    border-radius: 20px;
+  }
+  .card-icon-wrap { width: 38px; height: 38px; border-radius: 11px; }
+  .card-icon-wrap svg { width: 19px; height: 19px; }
+  .card-number { font-size: 11px; }
+  .card-title { font-size: clamp(17px, 2.2vw, 21px); }
+  .card-desc { font-size: clamp(13px, 1.7vw, 15px); line-height: 1.45; }
+  .card-link { font-size: 11px; }
+
+  /* Story + coffee copy stay inside a comfortable measure */
+  .story-content { max-width: 640px; }
+  .chair-title { font-size: clamp(23px, 3.1vw, 31px); }
+  .chair-desc { font-size: clamp(14px, 1.9vw, 16px); max-width: 640px; }
+  .mug-body { padding: 20px 22px 24px 22px; }
+  .mug-header { font-size: 15px; }
+  .glass-input { font-size: 16px; padding: 12px 14px; }
+  .btn-reserve { padding: 14px 18px; font-size: 15px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

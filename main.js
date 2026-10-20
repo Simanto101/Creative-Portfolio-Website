@@ -13,9 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Must stay in sync with the compact media query in style.css
   const compactMQ = window.matchMedia('(max-width: 1023.98px), (orientation: portrait) and (max-width: 1179.98px), (max-height: 500px)');
   let isMobile = compactMQ.matches;
-  // Phones use the portrait film; tablets keep the 16:9 film (anchored cover fit),
-  // otherwise an 828px-wide portrait frame is blown up ~2x on an 834px tablet.
-  const usePortraitFrames = () => isMobile && window.innerWidth < 700 && window.innerHeight > window.innerWidth;
+  // Every portrait screen (phones + tablets) gets the portrait film, which is composed
+  // for a tall crop. Cropping the 16:9 desktop film to portrait zooms ~2.5x into him.
+  const usePortraitFrames = () => isMobile && window.innerHeight >= window.innerWidth;
   const lerp = (a, b, t) => a + (b - a) * t;
   const clamp01 = (t) => Math.min(1, Math.max(0, t));
 
@@ -67,11 +67,17 @@ document.addEventListener('DOMContentLoaded', () => {
     isMobile = compactMQ.matches;
     const wantDir = usePortraitFrames() ? './frames-mobile' : './frames-desktop';
     if (wantDir !== frameDir) { frameDir = wantDir; startLoading(); }
-    let dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-    // Phones: never allocate a canvas bigger than the source frame (sharp + cheaper to fill)
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Phones: never allocate a canvas bigger than the source frame (sharp + cheaper to fill).
+    // Desktop: the source is 1920x1080, so past ~1.6x we only pay for pixels we cannot see.
     if (frameDir === './frames-mobile') dpr = Math.min(dpr, MOBILE_FRAME_W / window.innerWidth);
+    else dpr = Math.min(dpr, 1.6);
     canvas.width = Math.round(window.innerWidth * dpr);
     canvas.height = Math.round(window.innerHeight * dpr);
+    if (ctx) {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'medium';
+    }
     computeSceneKeys();
     measureHero();
     render();
@@ -79,27 +85,14 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', resizeCanvas);
   window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 120));
 
-  // Progressive loading: frame 1 first (instant hero), then every 4th frame, then fill in.
+  // Progressive loading: frame 1 first (instant hero), then strictly in order,
+  // so the film is always complete up to where the viewer is (no 4-frame stepping).
   function startLoading() {
     const token = ++loadToken;
     frameImages = new Array(TOTAL_FRAMES);
     loadedIndices = new Set();
-    const order = [];
-    for (let i = 4; i < TOTAL_FRAMES; i += 4) order.push(i);
-    for (let i = 1; i < TOTAL_FRAMES; i++) if (i % 4 !== 0) order.push(i);
-    let next = 0;
+    let next = 1;
     const CONCURRENCY = 6;
-    const milestoneCount = Math.floor((TOTAL_FRAMES - 1) / 4);
-    let fillAllowed = document.readyState === 'complete';
-    const allowFill = () => {
-      if (fillAllowed) return;
-      fillAllowed = true;
-      for (let c = 0; c < CONCURRENCY; c++) pump();
-    };
-    if (!fillAllowed) {
-      window.addEventListener('load', () => setTimeout(allowFill, 300), { once: true });
-      window.addEventListener('scroll', allowFill, { once: true, passive: true });
-    }
     const loadOne = (idx, done) => {
       const img = new Image();
       img.decoding = 'async';
@@ -115,15 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
       img.src = getFrameUrl(idx + 1);
     };
     const pump = () => {
-      if (token !== loadToken || next >= order.length) return;
-      if (next >= milestoneCount && !fillAllowed) return; // wait; allowFill() restarts the pumps
-      loadOne(order[next++], pump);
+      if (token !== loadToken || next >= TOTAL_FRAMES) return;
+      loadOne(next++, pump);
     };
-    // Milestones start once the page has loaded (keeps the first paint / LCP path free)
-    const startPumps = () => { for (let c = 0; c < CONCURRENCY; c++) pump(); };
     loadOne(0, () => {
-      if (document.readyState === 'complete') startPumps();
-      else window.addEventListener('load', startPumps, { once: true });
+      if (document.readyState === 'complete') { for (let c = 0; c < CONCURRENCY; c++) pump(); }
+      else window.addEventListener('load', () => { if (token === loadToken) for (let c = 0; c < CONCURRENCY; c++) pump(); }, { once: true });
     });
   }
   startLoading();
@@ -154,11 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const heroScene = document.getElementById('hero');
   const heroContent = document.querySelector('.hero-content');
   const heroInner = document.querySelector('.hero-scene .scene-inner');
+  const scrimRight = document.querySelector('.hero-scrim-right');
+  const scrimLeft = document.querySelector('.hero-scrim-left');
+  const heroCue = document.querySelector('.hero-cue');
   let heroTravel = 0;
   function measureHero() {
     if (!heroInner || !heroContent) return;
     heroTravel = Math.max(0, heroInner.clientWidth - heroContent.offsetWidth);
-    document.documentElement.style.setProperty('--hero-travel', heroTravel.toFixed(1) + 'px');
   }
 
   const topOf = (sel) => {
@@ -182,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const glance = topOf('#glance-section');
     const story = topOf('#story-section');
     const chair = topOf('#chair-section');
+    docMax = Math.max(1, document.documentElement.scrollHeight - vh);
 
     if (isMobile) {
       sceneKeys = [
@@ -193,15 +186,13 @@ document.addEventListener('DOMContentLoaded', () => {
         [chair + chairScroll * 0.30, 178],
         [chair + chairScroll, 192]
       ];
-    } else {
-      sceneKeys = [
+    } else {      sceneKeys = [
         [0, 0],
         [heroScrollPx * 0.06, 3],
         [heroScrollPx * 0.94, 102],
         [glance, 112],
-        [story, 112],
-        [chair, 122],
-        [chair + Math.min(300, chairScroll * 0.6), 158],
+        [story, 116],
+        [chair, 124],
         [chair + chairScroll, 192]
       ];
     }
@@ -213,7 +204,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (y <= k[0][0]) return k[0][1];
     for (let i = 1; i < k.length; i++) {
       if (y <= k[i][0]) {
-        frame = lerp(k[i - 1][1], k[i][1], (y - k[i - 1][0]) / Math.max(1, k[i][0] - k[i - 1][0]));
+        // Ease in/out inside every segment, so the film never changes speed with a
+        // jolt at a section boundary (this is what makes the scroll feel cut).
+        const t = (y - k[i - 1][0]) / Math.max(1, k[i][0] - k[i - 1][0]);
+        frame = lerp(k[i - 1][1], k[i][1], t * t * (3 - 2 * t));
         break;
       }
     }
@@ -244,49 +238,69 @@ document.addEventListener('DOMContentLoaded', () => {
   // Hero composition: the text block travels opposite the subject.
   // Subject left  -> text right; as he crosses the frame the text dissolves,
   // then re-forms on the left as he reaches the right side.
+  // Everything is written straight onto the elements (no CSS custom properties):
+  // transform/opacity only, so the compositor does the work and the film stays smooth.
+  const smoothstep = (t) => t * t * (3 - 2 * t);
   let heroSide = 0;
   let heroFade = 1;
   let heroAway = 0;
   let heroExit = 0;
-  let lastHeroVars = '';
+  let lastHeroKey = '';
   function updateHeroComposition(frame) {
-    if (!heroScene || isMobile) return;
+    if (!heroScene || !heroContent || isMobile) return;
+
     if (reduceMotion) {
-      if (lastHeroVars !== 'rest') {
-        const r = document.documentElement.style;
-        r.setProperty('--hero-side', '0');
-        r.setProperty('--hero-fade', '1');
-        r.setProperty('--hero-away', '0');
-        r.setProperty('--hero-exit', '0');
-        lastHeroVars = 'rest';
+      if (lastHeroKey !== 'rest') {
+        heroContent.style.transform = 'translate3d(0, 0, 0)';
+        heroContent.style.opacity = '1';
+        if (scrimRight) scrimRight.style.opacity = '1';
+        if (scrimLeft) scrimLeft.style.opacity = '0';
+        lastHeroKey = 'rest';
       }
       return;
     }
 
     const sx = subjectAt(frame);
-    // The copy slides from the right (subject left) to the left (subject right)…
-    const sideTarget = clamp01((sx - 0.44) / 0.12);
-    // …and is fully hidden while he walks through the middle of the frame.
-    const fadeIn = clamp01((sx - 0.44) / 0.06);
-    const fadeOut = clamp01((sx - 0.56) / 0.06);
-    const fadeTarget = 1 - fadeIn * (1 - fadeOut);
+    // Slide opposite him, eased across his whole walk (no whip, no snap).
+    const sideTarget = smoothstep(clamp01((sx - 0.40) / 0.22));
+    // Cross-dissolve while he passes the middle: long, eased ramps.
+    const outT = smoothstep(clamp01((sx - 0.40) / 0.075));
+    const inT = smoothstep(clamp01((sx - 0.545) / 0.075));
+    const fadeTarget = 1 - outT * (1 - inT);
     const y = window.scrollY;
-    const awayTarget = clamp01(y / (heroScrollPx * 0.16));
-    const exitTarget = clamp01((y - heroScrollPx * 0.84) / (heroScrollPx * 0.16));
+    const awayTarget = smoothstep(clamp01(y / (heroScrollPx * 0.18)));
+    const exitTarget = smoothstep(clamp01((y - heroScrollPx * 0.86) / (heroScrollPx * 0.14)));
 
-    heroSide += (sideTarget - heroSide) * 0.10;
-    heroFade += (fadeTarget - heroFade) * 0.18;
-    heroAway += (awayTarget - heroAway) * 0.18;
-    heroExit += (exitTarget - heroExit) * 0.18;
+    heroSide += (sideTarget - heroSide) * 0.14;
+    heroFade += (fadeTarget - heroFade) * 0.16;
+    heroAway += (awayTarget - heroAway) * 0.14;
+    heroExit += (exitTarget - heroExit) * 0.14;
 
-    const key = heroSide.toFixed(3) + '|' + heroFade.toFixed(3) + '|' + heroAway.toFixed(3) + '|' + heroExit.toFixed(3);
-    if (key === lastHeroVars) return;
-    lastHeroVars = key;
-    const r = document.documentElement.style;
-    r.setProperty('--hero-side', heroSide.toFixed(4));
-    r.setProperty('--hero-fade', heroFade.toFixed(3));
-    r.setProperty('--hero-away', heroAway.toFixed(3));
-    r.setProperty('--hero-exit', heroExit.toFixed(3));
+    const tx = -heroTravel * heroSide;
+    const ty = -heroAway * 34;
+    const alpha = heroFade * (1 - heroExit);
+    const key = tx.toFixed(0) + '|' + ty.toFixed(0) + '|' + alpha.toFixed(2) + '|' + heroSide.toFixed(2);
+    if (key === lastHeroKey) return;
+    lastHeroKey = key;
+
+    heroContent.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0)`;
+    heroContent.style.opacity = alpha.toFixed(3);
+    const pool = (0.45 + 0.55 * heroFade) * (1 - heroExit);
+    if (scrimRight) scrimRight.style.opacity = (pool * (1 - heroSide)).toFixed(3);
+    if (scrimLeft) scrimLeft.style.opacity = (pool * heroSide).toFixed(3);
+    if (heroCue) heroCue.style.opacity = ((1 - heroAway) * (1 - heroExit)).toFixed(2);
+  }
+
+  let lastCompactKey = '';
+  // Compact screens are a single cover screen, so the copy scrolls up over the film.
+  // Fade it out as it leaves instead of letting it slide across his face.
+  function updateCompactHeroExit() {
+    if (!isMobile || !heroContent) return;
+    const alpha = reduceMotion ? 1 : 1 - smoothstep(clamp01(window.scrollY / (window.innerHeight * 0.40)));
+    const key = alpha.toFixed(2);
+    if (key === lastCompactKey) return;
+    lastCompactKey = key;
+    heroContent.style.opacity = key;
   }
 
   let lastFade = -1;
@@ -296,12 +310,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!ctx || !canvas) return;
     const exactFrame = frameFromY(smoothY);
     updateHeroComposition(exactFrame);
+    updateCompactHeroExit();
     const img = getBestLoadedImage(exactFrame);
     if (img && img.complete && img.naturalWidth) {
       const size = canvas.width + 'x' + canvas.height;
       if (img !== lastDrawn || size !== lastSize) { // skip redundant draws (saves battery / GPU)
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
         if (frameDir === './frames-mobile') drawMobile(img, canvas.width, canvas.height);
         else drawCoverAnchored(img, canvas.width, canvas.height, subjectAt(exactFrame));
         lastDrawn = img;
@@ -321,13 +334,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  const progressBar = document.querySelector('.scroll-progress');
+  let docMax = 1;
   function readScroll() {
     const y = window.scrollY || document.documentElement.scrollTop;
-    const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    targetProgress = y / max;
-    document.documentElement.style.setProperty('--page-progress', targetProgress.toFixed(4));
+    const p = Math.min(1, y / docMax);
+    targetProgress = p;
+    if (progressBar) progressBar.style.transform = `scaleX(${p.toFixed(4)})`;
     // The rail should only replace the pill once the pinned hero is over.
-    const morphAt = (!isMobile && heroScrollPx > 1) ? heroScrollPx * 0.92 : max * 0.08;
+    const morphAt = (!isMobile && heroScrollPx > 1) ? heroScrollPx * 0.92 : docMax * 0.08;
     handleNavMorph(y > morphAt);
   }
   if (lenis) lenis.on('scroll', readScroll);
@@ -523,11 +538,11 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollTrigger: { trigger: '#chair-section', start: 'top top', end: 'bottom bottom', scrub: reduceMotion ? true : 0.4 }
       });
       chairTl
-        .to({}, { duration: 0.30 }) // clean hold: Simanto + mug, no text
-        .to('.chair-title, .chair-desc', { opacity: 1, y: 0, duration: 0.22, ease: 'power2.out' })
-        .to('.mug-form-wrapper', { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' })
-        .to(formFields, { opacity: 1, y: 0, duration: 0.12, stagger: 0.025, ease: 'power2.out' }, '-=0.08')
-        .to({}, { duration: 0.12 });
+        .to({}, { duration: 0.18 }) // short hold: Simanto + mug, then the copy lands
+        .to('.chair-title, .chair-desc', { opacity: 1, y: 0, duration: 0.24, ease: 'power2.out' })
+        .to('.mug-form-wrapper', { opacity: 1, y: 0, duration: 0.22, ease: 'power2.out' })
+        .to(formFields, { opacity: 1, y: 0, duration: 0.14, stagger: 0.025, ease: 'power2.out' }, '-=0.08')
+        .to({}, { duration: 0.10 });
 
       if (burgerBtn) {
         ScrollTrigger.create({
