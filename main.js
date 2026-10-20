@@ -10,7 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(pointer: coarse)').matches;
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  const isMobile = window.innerWidth < 768;
+  // Must stay in sync with the compact media query in style.css
+  const compactMQ = window.matchMedia('(max-width: 1023.98px), (orientation: portrait) and (max-width: 1179.98px), (max-height: 500px)');
+  let isMobile = compactMQ.matches;
+  // Phones use the portrait film; tablets keep the 16:9 film (anchored cover fit),
+  // otherwise an 828px-wide portrait frame is blown up ~2x on an 834px tablet.
+  const usePortraitFrames = () => isMobile && window.innerWidth < 700 && window.innerHeight > window.innerWidth;
   const lerp = (a, b, t) => a + (b - a) * t;
   const clamp01 = (t) => Math.min(1, Math.max(0, t));
 
@@ -47,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const DARK = '#060b18';
   const MOBILE_FRAME_W = 828;
 
-  let frameDir = isMobile ? './frames-mobile' : './frames-desktop';
+  let frameDir = usePortraitFrames() ? './frames-mobile' : './frames-desktop';
   const getFrameUrl = (n) => `${frameDir}/frame-${String(n).padStart(3, '0')}.webp`;
 
   let frameImages = new Array(TOTAL_FRAMES);
@@ -59,19 +64,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resizeCanvas() {
     if (!canvas) return;
-    const mobileNow = window.innerWidth < 768;
-    const wantDir = mobileNow ? './frames-mobile' : './frames-desktop';
+    isMobile = compactMQ.matches;
+    const wantDir = usePortraitFrames() ? './frames-mobile' : './frames-desktop';
     if (wantDir !== frameDir) { frameDir = wantDir; startLoading(); }
     let dpr = Math.min(window.devicePixelRatio || 1, 2.5);
     // Phones: never allocate a canvas bigger than the source frame (sharp + cheaper to fill)
-    if (mobileNow) dpr = Math.min(dpr, MOBILE_FRAME_W / window.innerWidth);
+    if (frameDir === './frames-mobile') dpr = Math.min(dpr, MOBILE_FRAME_W / window.innerWidth);
     canvas.width = Math.round(window.innerWidth * dpr);
     canvas.height = Math.round(window.innerHeight * dpr);
-    computeMobileKeys();
+    computeSceneKeys();
+    measureHero();
     render();
   }
   window.addEventListener('resize', resizeCanvas);
-  window.addEventListener('load', () => computeMobileKeys());
+  window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 120));
 
   // Progressive loading: frame 1 first (instant hero), then every 4th frame, then fill in.
   function startLoading() {
@@ -132,56 +138,97 @@ document.addEventListener('DOMContentLoaded', () => {
     return null;
   }
 
-  // Desktop mapping (unchanged timing): global scroll progress -> frame
-  function desktopFrameFromProgress(p) {
-    const k = 65 / 96;
-    const frac = p <= 0.42 ? (p / 0.42) * k : k + ((p - 0.42) / 0.58) * (1 - k);
-    return frac * (TOTAL_FRAMES - 1);
+  // Subject centre (x, % of frame width) sampled every 4 frames from the film.
+  // Measured from the frames themselves, so text can sit opposite the person.
+  const SUBJECT_TRACK = [26.0,26.0,25.7,25.1,24.4,24.4,26.0,29.7,33.1,35.5,39.3,42.6,46.4,50.4,55.1,59.9,63.7,66.5,68.6,70.2,71.9,73.5,74.6,75.0,75.0,74.9,74.8,74.3,73.2,71.3,68.5,65.3,61.4,56.5,50.5,43.6,38.3,35.3,32.5,30.3,29.5,29.5,29.5,29.5,29.6,29.6,29.6,29.6,29.6];
+  const TRACK_STEP = 4;
+
+  function subjectAt(frame) {
+    const t = Math.max(0, Math.min(SUBJECT_TRACK.length - 1, frame / TRACK_STEP));
+    const i = Math.floor(t);
+    const a = SUBJECT_TRACK[i];
+    const b = SUBJECT_TRACK[Math.min(SUBJECT_TRACK.length - 1, i + 1)];
+    return (a + (b - a) * (t - i)) / 100;
   }
 
-  // Mobile mapping: anchored to section positions (values in "story units" 0..95, scaled to 193 frames)
-  let mobileKeys = [[0, 0], [1, 95]];
-  function computeMobileKeys() {
+  const heroScene = document.getElementById('hero');
+  const heroContent = document.querySelector('.hero-content');
+  const heroInner = document.querySelector('.hero-scene .scene-inner');
+  let heroTravel = 0;
+  function measureHero() {
+    if (!heroInner || !heroContent) return;
+    heroTravel = Math.max(0, heroInner.clientWidth - heroContent.offsetWidth);
+    document.documentElement.style.setProperty('--hero-travel', heroTravel.toFixed(1) + 'px');
+  }
+
+  const topOf = (sel) => {
+    const el = document.querySelector(sel);
+    return el ? el.getBoundingClientRect().top + window.scrollY : 0;
+  };
+
+  // One timeline, anchored to real section positions (in frame units, 0..192).
+  // Desktop: the whole first sweep (subject left -> right) plays inside the hero.
+  // Compact: hero is a short cover; the film follows the page sections.
+  let sceneKeys = [[0, 0], [1, 192]];
+  let heroTopPx = 0;
+  let heroScrollPx = 1;
+  function computeSceneKeys() {
     const vh = window.innerHeight;
-    const topOf = (sel) => {
-      const el = document.querySelector(sel);
-      return el ? el.getBoundingClientRect().top + window.scrollY : 0;
-    };
+    const heroEl = document.getElementById('hero');
+    const chairEl = document.getElementById('chair-section');
+    heroScrollPx = heroEl ? Math.max(1, heroEl.offsetHeight - vh) : 1;
+    heroTopPx = heroEl ? heroEl.getBoundingClientRect().top + window.scrollY : 0;
+    const chairScroll = chairEl ? Math.max(1, chairEl.offsetHeight - vh) : vh;
     const glance = topOf('#glance-section');
     const story = topOf('#story-section');
-    const chairEl = document.getElementById('chair-section');
     const chair = topOf('#chair-section');
-    const chairScroll = chairEl ? Math.max(1, chairEl.offsetHeight - vh) : vh;
-    mobileKeys = [
-      [0, 0],
-      [glance * 0.35, 6],
-      [glance, 34],
-      [story, 56],
-      [story + (chair - story) * 0.82, 82],
-      [chair + chairScroll * 0.30, 88],
-      [chair + chairScroll, 95]
-    ];
-  }
-  function mobileFrameFromY(y) {
-    const k = mobileKeys;
-    let u = k[k.length - 1][1];
-    if (y <= k[0][0]) u = k[0][1];
-    else {
-      for (let i = 1; i < k.length; i++) {
-        if (y <= k[i][0]) {
-          u = lerp(k[i - 1][1], k[i][1], (y - k[i - 1][0]) / Math.max(1, k[i][0] - k[i - 1][0]));
-          break;
-        }
-      }
+
+    if (isMobile) {
+      sceneKeys = [
+        [0, 0],
+        [glance * 0.35, 12],
+        [glance, 69],
+        [story, 113],
+        [story + (chair - story) * 0.82, 166],
+        [chair + chairScroll * 0.30, 178],
+        [chair + chairScroll, 192]
+      ];
+    } else {
+      sceneKeys = [
+        [0, 0],
+        [heroScrollPx * 0.06, 3],
+        [heroScrollPx * 0.94, 102],
+        [glance, 112],
+        [story, 112],
+        [chair, 122],
+        [chair + Math.min(300, chairScroll * 0.6), 158],
+        [chair + chairScroll, 192]
+      ];
     }
-    return u * (TOTAL_FRAMES - 1) / 95;
   }
 
-  function drawDesktop(img, cw, ch) {
+  function frameFromY(y) {
+    const k = sceneKeys;
+    let frame = k[k.length - 1][1];
+    if (y <= k[0][0]) return k[0][1];
+    for (let i = 1; i < k.length; i++) {
+      if (y <= k[i][0]) {
+        frame = lerp(k[i - 1][1], k[i][1], (y - k[i - 1][0]) / Math.max(1, k[i][0] - k[i - 1][0]));
+        break;
+      }
+    }
+    return frame;
+  }
+
+  // Cover-fit, but anchored on the subject instead of the frame centre,
+  // so portrait/tablet viewports never crop the face off.
+  function drawCoverAnchored(img, cw, ch, sx) {
     const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-    const nw = Math.ceil(img.naturalWidth * scale);
-    const nh = Math.ceil(img.naturalHeight * scale);
-    ctx.drawImage(img, Math.floor((cw - nw) / 2), Math.floor((ch - nh) / 2), nw, nh);
+    const dw = img.naturalWidth * scale;
+    const dh = img.naturalHeight * scale;
+    const dx = Math.min(0, Math.max(cw - dw, sx * (cw - dw)));
+    const dy = Math.min(0, Math.max(ch - dh, (ch - dh) / 2));
+    ctx.drawImage(img, Math.floor(dx), Math.floor(dy), Math.ceil(dw), Math.ceil(dh));
   }
 
   function drawMobile(img, cw, ch) {
@@ -194,35 +241,78 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.drawImage(img, 0, 0, cw, nh);
   }
 
+  // Hero composition: the text block travels opposite the subject.
+  // Subject left  -> text right; as he crosses the frame the text dissolves,
+  // then re-forms on the left as he reaches the right side.
+  let heroSide = 0;
+  let heroFade = 1;
+  let heroAway = 0;
+  let heroExit = 0;
+  let lastHeroVars = '';
+  function updateHeroComposition(frame) {
+    if (!heroScene || isMobile) return;
+    if (reduceMotion) {
+      if (lastHeroVars !== 'rest') {
+        const r = document.documentElement.style;
+        r.setProperty('--hero-side', '0');
+        r.setProperty('--hero-fade', '1');
+        r.setProperty('--hero-away', '0');
+        r.setProperty('--hero-exit', '0');
+        lastHeroVars = 'rest';
+      }
+      return;
+    }
+
+    const sx = subjectAt(frame);
+    // The copy slides from the right (subject left) to the left (subject right)…
+    const sideTarget = clamp01((sx - 0.44) / 0.12);
+    // …and is fully hidden while he walks through the middle of the frame.
+    const fadeIn = clamp01((sx - 0.44) / 0.06);
+    const fadeOut = clamp01((sx - 0.56) / 0.06);
+    const fadeTarget = 1 - fadeIn * (1 - fadeOut);
+    const y = window.scrollY;
+    const awayTarget = clamp01(y / (heroScrollPx * 0.16));
+    const exitTarget = clamp01((y - heroScrollPx * 0.84) / (heroScrollPx * 0.16));
+
+    heroSide += (sideTarget - heroSide) * 0.10;
+    heroFade += (fadeTarget - heroFade) * 0.18;
+    heroAway += (awayTarget - heroAway) * 0.18;
+    heroExit += (exitTarget - heroExit) * 0.18;
+
+    const key = heroSide.toFixed(3) + '|' + heroFade.toFixed(3) + '|' + heroAway.toFixed(3) + '|' + heroExit.toFixed(3);
+    if (key === lastHeroVars) return;
+    lastHeroVars = key;
+    const r = document.documentElement.style;
+    r.setProperty('--hero-side', heroSide.toFixed(4));
+    r.setProperty('--hero-fade', heroFade.toFixed(3));
+    r.setProperty('--hero-away', heroAway.toFixed(3));
+    r.setProperty('--hero-exit', heroExit.toFixed(3));
+  }
+
   let lastFade = -1;
   let lastDrawn = null;
   let lastSize = '';
   function render() {
     if (!ctx || !canvas) return;
-    const mobileNow = window.innerWidth < 768;
-    const exactFrame = mobileNow
-      ? mobileFrameFromY(smoothY)
-      : desktopFrameFromProgress(clamp01(smoothProgress));
+    const exactFrame = frameFromY(smoothY);
+    updateHeroComposition(exactFrame);
     const img = getBestLoadedImage(exactFrame);
     if (img && img.complete && img.naturalWidth) {
       const size = canvas.width + 'x' + canvas.height;
       if (img !== lastDrawn || size !== lastSize) { // skip redundant draws (saves battery / GPU)
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
-        if (mobileNow) drawMobile(img, canvas.width, canvas.height);
-        else drawDesktop(img, canvas.width, canvas.height);
+        if (frameDir === './frames-mobile') drawMobile(img, canvas.width, canvas.height);
+        else drawCoverAnchored(img, canvas.width, canvas.height, subjectAt(exactFrame));
         lastDrawn = img;
         lastSize = size;
       }
     }
     // Never show the zoomed video behind the footer
     let fade = 1;
-    if (mobileNow && footerEl) {
+    if (footerEl) {
       const ft = footerEl.getBoundingClientRect().top / window.innerHeight;
-      fade = clamp01((ft - 0.25) / 0.6);
-    } else if (!mobileNow) {
-      const p = clamp01(smoothProgress);
-      fade = p >= 0.86 ? Math.max(0, 1 - (p - 0.86) / 0.08) : 1;
+      fade = clamp01(ft / (isMobile ? 0.6 : 0.55));
     }
     fade = Math.round(fade * 100) / 100;
     if (fade !== lastFade) {
@@ -235,7 +325,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const y = window.scrollY || document.documentElement.scrollTop;
     const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
     targetProgress = y / max;
-    handleNavMorph(targetProgress);
+    document.documentElement.style.setProperty('--page-progress', targetProgress.toFixed(4));
+    // The rail should only replace the pill once the pinned hero is over.
+    const morphAt = (!isMobile && heroScrollPx > 1) ? heroScrollPx * 0.92 : max * 0.08;
+    handleNavMorph(y > morphAt);
   }
   if (lenis) lenis.on('scroll', readScroll);
   else window.addEventListener('scroll', readScroll, { passive: true });
@@ -247,7 +340,13 @@ document.addEventListener('DOMContentLoaded', () => {
     smoothY += (y - smoothY) * lerpSpeed;
     if (Math.abs(y - smoothY) < 0.5) smoothY = y;
     render();
-    requestAnimationFrame(raf);
+  requestAnimationFrame(raf);
+
+  // Layout depends on fonts + inner page heights, so re-measure once they settle.
+  window.addEventListener('load', () => { computeSceneKeys(); measureHero(); });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { computeSceneKeys(); measureHero(); });
+  }
   }
   requestAnimationFrame(raf);
 
@@ -255,8 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. NAVIGATION (desktop pill -> vertical left panel; mobile glass drawer)
   // =========================================================================
   const navWrapper = document.getElementById('nav-wrapper');
-  function handleNavMorph(progress) {
-    if (navWrapper) navWrapper.classList.toggle('morphed', progress > 0.08);
+  function handleNavMorph(on) {
+    if (navWrapper) navWrapper.classList.toggle('morphed', !!on);
   }
 
   const burgerBtn = document.getElementById('mobile-burger');
@@ -456,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
           { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.7, stagger: 0.1, ease: 'power3.out', clearProps: 'filter,transform' }, 0.15);
     }
 
-    ScrollTrigger.addEventListener('refresh', computeMobileKeys);
+    ScrollTrigger.addEventListener('refresh', () => { computeSceneKeys(); measureHero(); });
   }
 
   // Hero intro runs entirely in CSS (starts on first paint, no JS needed). The per-letter spans are
