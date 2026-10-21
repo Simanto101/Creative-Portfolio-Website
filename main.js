@@ -52,6 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let frameImages = new Array(TOTAL_FRAMES);
   let loadedIndices = new Set();
+  let decodedIndices = new Set();
+  const decodeQueue = [];
+  let decodeBusy = 0;
   let loadToken = 0;
   let targetProgress = 0;
   let smoothProgress = 0;
@@ -78,6 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = ++loadToken;
     frameImages = new Array(TOTAL_FRAMES);
     loadedIndices = new Set();
+    decodedIndices = new Set();
+    decodeQueue.length = 0;
     const order = [];
     for (let i = 4; i < TOTAL_FRAMES; i += 4) order.push(i);
     for (let i = 1; i < TOTAL_FRAMES; i++) if (i % 4 !== 0) order.push(i);
@@ -102,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (token !== loadToken) return;
         frameImages[idx] = img;
         loadedIndices.add(idx);
+        queueDecode(idx);
         if (idx === 0) resizeCanvas();
         done();
       };
@@ -121,6 +127,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   startLoading();
+
+  // Pre-decode frames BEFORE the scroll reaches them. drawImage of a WebP that
+  // has only finished downloading (not decoding) forces a synchronous decode
+  // on the draw path — that is the visible "stick" while scrolling. decode()
+  // moves that work off the scroll path; nothing visual changes.
+  function queueDecode(idx, front) {
+    if (idx < 0 || idx >= TOTAL_FRAMES || decodedIndices.has(idx)) return;
+    const at = decodeQueue.indexOf(idx);
+    if (at !== -1) {
+      if (front) { decodeQueue.splice(at, 1); decodeQueue.unshift(idx); }
+      return;
+    }
+    if (front) decodeQueue.unshift(idx); else decodeQueue.push(idx);
+    pumpDecode();
+  }
+  function pumpDecode() {
+    while (decodeBusy < 2 && decodeQueue.length) {
+      const idx = decodeQueue.shift();
+      const img = frameImages[idx];
+      if (!img || decodedIndices.has(idx)) continue; // not loaded yet; loadOne re-queues it
+      decodedIndices.add(idx);
+      if (!img.decode) continue;
+      decodeBusy++;
+      img.decode().catch(() => {}).finally(() => { decodeBusy--; pumpDecode(); });
+    }
+  }
 
   function getBestLoadedImage(exactIdx) {
     const target = Math.min(TOTAL_FRAMES - 1, Math.max(0, Math.round(exactIdx)));
@@ -203,6 +235,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const exactFrame = mobileNow
       ? mobileFrameFromY(smoothY)
       : desktopFrameFromProgress(clamp01(smoothProgress));
+    // Keep the next frames ahead of the playhead decoded and ready.
+    const ahead = Math.round(exactFrame);
+    for (let k = 10; k >= 1; k--) queueDecode(ahead + k, true);
     const img = getBestLoadedImage(exactFrame);
     if (img && img.complete && img.naturalWidth) {
       const size = canvas.width + 'x' + canvas.height;
