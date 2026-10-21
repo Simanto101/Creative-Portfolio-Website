@@ -271,8 +271,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const awayTarget = smoothstep(clamp01(y / (heroScrollPx * 0.18)));
     const exitTarget = smoothstep(clamp01((y - heroScrollPx * 0.86) / (heroScrollPx * 0.14)));
 
-    heroSide += (sideTarget - heroSide) * 0.14;
-    heroFade += (fadeTarget - heroFade) * 0.16;
+    // Side + fade are pure functions of the (already smoothed) film frame, so
+    // drive them directly: the text stays locked to the subject instead of
+    // trailing a second lerp behind him and settling at partial opacity.
+    heroSide = sideTarget;
+    heroFade = fadeTarget;
     heroAway += (awayTarget - heroAway) * 0.14;
     heroExit += (exitTarget - heroExit) * 0.14;
 
