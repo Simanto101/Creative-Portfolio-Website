@@ -4086,3 +4086,151 @@ body.sync-on .band-rise {
     bottom: 24px;
   }
 }
+
+/* ==========================================================================
+   STEP 3 (2026-11-15): "Where I build" cards, ONE format. The two
+   oversized venture bands and the two slim rows are replaced by four
+   identical cards (01-04): number + glass icon, title, one-line
+   description, metadata line, Explore link. Right-sized and tight:
+   a balanced 2x2 grid on desktop, one full-width stack on phones, and
+   no dead space inside or under the heading. All four icons use the
+   site's navy/cyan glass-chip treatment with the nav's line icons;
+   the pink CCB monogram badge is gone everywhere on this page (card,
+   hero pill, footer chip now carry the heart line icon instead).
+   ========================================================================== */
+.glass-chip svg {
+  width: 62%;
+  height: 62%;
+  flex: none;
+  color: var(--accent-ice);
+}
+
+.build-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr; /* every card in a row (and the whole phone stack) shares one height */
+  gap: 20px;
+  width: 100%;
+}
+
+.build-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 212px;
+  padding: 22px 24px 20px;
+  border-radius: 18px;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.055) 0%, rgba(10, 20, 36, 0.88) 55%, rgba(8, 15, 31, 0.94) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.build-card:hover,
+.build-card:focus-visible {
+  border-color: rgba(125, 211, 252, 0.42);
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.075) 0%, rgba(12, 24, 44, 0.9) 55%, rgba(9, 18, 35, 0.95) 100%);
+}
+
+.build-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.build-num {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  color: var(--accent-cyan);
+  line-height: 1;
+  padding-top: 4px;
+}
+
+.build-card .build-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+}
+
+.build-card .build-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.build-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.build-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.45rem, 2.2vw, 1.8rem);
+  line-height: 1.08;
+  color: #ffffff;
+}
+
+.build-desc {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(203, 220, 238, 0.85);
+}
+
+.build-card-foot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.build-meta {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.build-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  white-space: nowrap;
+}
+
+.build-card:hover .band-arrow,
+.build-card:focus-visible .band-arrow {
+  transform: translateX(5px);
+}
+
+@media (max-width: 767.98px) {
+  .build-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .build-card {
+    min-height: 0;
+    padding: 18px;
+    gap: 12px;
+  }
+
+  .build-title {
+    font-size: 1.5rem;
+  }
+}

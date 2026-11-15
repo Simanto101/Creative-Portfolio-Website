@@ -192,7 +192,7 @@
             </a>
             <!-- Cancer CARE Bangladesh (CCB): original monogram in a glass chip -->
             <a href="./ccb.html" class="glass-pill">
-              <span class="pill-icon glass-chip glass-chip--fill"><img src="./assets/icon-ccb-monogram.jpg" alt="" width="316" height="316"></span>
+              <span class="pill-icon glass-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></span>
               <span>Founder & President, Cancer CARE Bangladesh (CCB)</span>
             </a>
           </div>
@@ -221,60 +221,72 @@
           <div class="eyebrow">AT A GLANCE</div>
           <h2 class="scene-title">Where I build.</h2>
 
-          <div class="venture-bands">
+          <!-- Step 3: ONE card format for all four: number, icon, title,
+               one-line description, metadata line, Explore link. -->
+          <div class="build-grid">
 
-            <!-- Band 01: NeuroParsec (whole band is the link) -->
-            <a class="venture-band" id="band-neuroparsec" href="./neuroparsec.html" aria-label="Explore NeuroParsec">
-              <span class="band-media" aria-hidden="true"><img src="./assets/band-neuroparsec.jpg" alt="" width="2240" height="1120" loading="lazy"></span>
-              <span class="band-shade" aria-hidden="true"></span>
-              <span class="band-numeral" aria-hidden="true">01</span>
-              <span class="band-inner">
-                <span class="glass-chip glass-chip--band glass-chip--np band-rise band-rise--1"><img src="./assets/icon-neuroparsec-symbol.png" alt="" width="880" height="485"></span>
-                <span class="band-copy">
-                  <h3 class="band-name band-rise band-rise--2">NeuroParsec</h3>
-                  <p class="band-desc band-rise band-rise--3">AI for clinical care and medical education.</p>
-                </span>
-                <span class="band-explore band-rise band-rise--4">Explore <span class="band-arrow" aria-hidden="true">&rarr;</span></span>
+            <!-- 01: NeuroParsec -->
+            <a class="build-card" id="card-neuroparsec" href="./neuroparsec.html" aria-label="Explore NeuroParsec">
+              <span class="build-card-head">
+                <span class="build-num" aria-hidden="true">01</span>
+                <span class="build-icon glass-chip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></span>
+              </span>
+              <span class="build-card-main">
+                <h3 class="build-title">NeuroParsec</h3>
+                <p class="build-desc">AI for clinical care and medical education.</p>
+              </span>
+              <span class="build-card-foot">
+                <span class="build-meta">Health tech · Founder &amp; CEO</span>
+                <span class="build-explore">Explore <span class="band-arrow" aria-hidden="true">&rarr;</span></span>
               </span>
             </a>
 
-            <!-- Band 02: Cancer CARE Bangladesh (CCB) (whole band is the link) -->
-            <a class="venture-band" id="band-ccb" href="./ccb.html" aria-label="Explore Cancer CARE Bangladesh (CCB)">
-              <span class="band-media" aria-hidden="true"><img src="./assets/band-ccb.jpg" alt="" width="2240" height="1120" loading="lazy"></span>
-              <span class="band-shade" aria-hidden="true"></span>
-              <span class="band-numeral" aria-hidden="true">02</span>
-              <span class="band-inner">
-                <span class="glass-chip glass-chip--band glass-chip--fill band-rise band-rise--1"><img src="./assets/icon-ccb-monogram.jpg" alt="" width="316" height="316"></span>
-                <span class="band-copy">
-                  <h3 class="band-name band-rise band-rise--2">Cancer CARE Bangladesh (CCB)</h3>
-                  <p class="band-desc band-rise band-rise--3">Cancer care, youth mental health and free real-hair wigs.</p>
-                </span>
-                <span class="band-explore band-rise band-rise--4">Explore <span class="band-arrow" aria-hidden="true">&rarr;</span></span>
+            <!-- 02: Cancer CARE Bangladesh (CCB) -->
+            <a class="build-card" id="card-ccb" href="./ccb.html" aria-label="Explore Cancer CARE Bangladesh (CCB)">
+              <span class="build-card-head">
+                <span class="build-num" aria-hidden="true">02</span>
+                <span class="build-icon glass-chip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></span>
+              </span>
+              <span class="build-card-main">
+                <h3 class="build-title">Cancer CARE Bangladesh (CCB)</h3>
+                <p class="build-desc">Cancer care, youth mental health and free real-hair wigs.</p>
+              </span>
+              <span class="build-card-foot">
+                <span class="build-meta">Nonprofit · Founder &amp; President</span>
+                <span class="build-explore">Explore <span class="band-arrow" aria-hidden="true">&rarr;</span></span>
               </span>
             </a>
 
-          </div>
-
-          <div class="cards-deck">
-
-            <!-- Row 03: Leadership -->
-            <a class="deck-card deck-row" id="card-leadership" href="./leadership.html" aria-label="Explore Leadership">
-              <span class="row-icon glass-chip glass-chip--fill" aria-hidden="true"><img src="./assets/icon-leadership.jpg" alt="" width="512" height="512" loading="lazy"></span>
-              <span class="row-text">
-                <span class="row-title">Leadership</span>
-                <span class="row-desc">PSO International Affairs. HUMIN. Aspire Leaders 2026.</span>
+            <!-- 03: Leadership -->
+            <a class="build-card" id="card-leadership" href="./leadership.html" aria-label="Explore Leadership">
+              <span class="build-card-head">
+                <span class="build-num" aria-hidden="true">03</span>
+                <span class="build-icon glass-chip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path></svg></span>
               </span>
-              <span class="row-arrow" aria-hidden="true">&rarr;</span>
+              <span class="build-card-main">
+                <h3 class="build-title">Leadership</h3>
+                <p class="build-desc">Where I show up for young people and big ideas.</p>
+              </span>
+              <span class="build-card-foot">
+                <span class="build-meta">PSO · HUMIN · Aspire Leaders 2026</span>
+                <span class="build-explore">Explore <span class="band-arrow" aria-hidden="true">&rarr;</span></span>
+              </span>
             </a>
 
-            <!-- Row 04: Playground -->
-            <a class="deck-card deck-row" id="card-playground" href="./playground.html" aria-label="Explore Playground">
-              <span class="row-icon glass-chip glass-chip--fill" aria-hidden="true"><img src="./assets/product-icons/master-app.png" alt="" width="512" height="512" loading="lazy"></span>
-              <span class="row-text">
-                <span class="row-title">Playground</span>
-                <span class="row-desc">Experiments, automations and things I'm cooking.</span>
+            <!-- 04: Playground -->
+            <a class="build-card" id="card-playground" href="./playground.html" aria-label="Explore Playground">
+              <span class="build-card-head">
+                <span class="build-num" aria-hidden="true">04</span>
+                <span class="build-icon glass-chip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31L4.08 19.16A2 2 0 0 0 5.8 22h12.4a2 2 0 0 0 1.72-2.84L14 9.31V2"></path><path d="M8.5 2h7"></path></svg></span>
               </span>
-              <span class="row-arrow" aria-hidden="true">&rarr;</span>
+              <span class="build-card-main">
+                <h3 class="build-title">Playground</h3>
+                <p class="build-desc">Experiments, automations and things I'm cooking.</p>
+              </span>
+              <span class="build-card-foot">
+                <span class="build-meta">Side projects · Ongoing</span>
+                <span class="build-explore">Explore <span class="band-arrow" aria-hidden="true">&rarr;</span></span>
+              </span>
             </a>
 
           </div>
@@ -402,7 +414,7 @@
         <span class="footer-tag">EXPLORE</span>
         <ul class="footer-links-list">
           <li><a href="./neuroparsec.html"><span class="glass-chip glass-chip--footer glass-chip--np"><img src="./assets/icon-neuroparsec-symbol.png" alt="" width="880" height="485"></span>NeuroParsec</a></li>
-          <li><a href="./ccb.html"><span class="glass-chip glass-chip--footer glass-chip--fill"><img src="./assets/icon-ccb-monogram.jpg" alt="" width="316" height="316"></span>Cancer CARE Bangladesh (CCB)</a></li>
+          <li><a href="./ccb.html"><span class="glass-chip glass-chip--footer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></span>Cancer CARE Bangladesh (CCB)</a></li>
           <li><a href="./leadership.html"><span class="glass-chip glass-chip--footer glass-chip--fill"><img src="./assets/icon-leadership.jpg" alt="" width="512" height="512"></span>Leadership</a></li>
           <li><a href="./playground.html"><span class="glass-chip glass-chip--footer glass-chip--fill"><img src="./assets/product-icons/master-app.png" alt="" width="512" height="512"></span>Playground</a></li>
         </ul>

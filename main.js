@@ -889,20 +889,13 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 0.6 }
       });
       masterTl = tl;
-      const addBand = (sel, E0, dir) => {
-        const band = document.querySelector(sel);
-        if (!band) return;
-        let s = seg(E0, E0 + 14);
-        tl.fromTo(band, { autoAlpha: 0, x: 48 * dir }, { autoAlpha: 1, x: 0, duration: s[1] }, s[0]);
-        const media = band.querySelector('.band-media');
-        if (media) {
-          s = seg(E0, E0 + 16);
-          tl.fromTo(media, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: s[1] }, s[0]);
-        }
-        band.querySelectorAll('.band-rise').forEach((el, i) => {
-          const r = seg(E0 + 4 + i * 3, E0 + 12 + i * 3);
-          tl.fromTo(el, { autoAlpha: 0, y: 26 }, { autoAlpha: 1, y: 0, duration: r[1] }, r[0]);
-        });
+      // Step 3: all four build cards share one format and one entrance,
+      // a rise + fade placed at the card's film beat.
+      const addCard = (sel, E0, E1) => {
+        const card = document.querySelector(sel);
+        if (!card) return;
+        const s = seg(E0, E1);
+        tl.fromTo(card, { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: s[1] }, s[0]);
       };
       let s;
       if (!mobile) {
@@ -910,16 +903,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // starts to cross (frames 26-40).
         s = seg(26, 40);
         tl.fromTo('.hero-content', { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -46, duration: s[1] }, s[0]);
-        // Glance: title, then the two venture bands, then the index rows,
+        // Glance: title, then the four build cards in beat order,
         // arriving across the crossing and the right hold.
         s = seg(36, 48);
         tl.fromTo('.glance-content .eyebrow, .glance-content .scene-title', { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: s[1] }, s[0]);
-        addBand('#band-neuroparsec', 42, -1);
-        addBand('#band-ccb', 58, 1);
-        s = seg(74, 86);
-        tl.fromTo('#card-leadership', { autoAlpha: 0, y: 44 }, { autoAlpha: 1, y: 0, duration: s[1] }, s[0]);
-        s = seg(84, 96);
-        tl.fromTo('#card-playground', { autoAlpha: 0, y: 44 }, { autoAlpha: 1, y: 0, duration: s[1] }, s[0]);
+        addCard('#card-neuroparsec', 42, 56);
+        addCard('#card-ccb', 58, 72);
+        addCard('#card-leadership', 74, 86);
+        addCard('#card-playground', 84, 96);
         // Story block: materialises as he walks back to his spot, just
         // before the first line (frame 143).
         s = seg(128, 140);
@@ -941,12 +932,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // title and "Coffee." with the raise, then the booking form.
         s = seg(64, 72);
         tl.fromTo('.glance-content .eyebrow, .glance-content .scene-title', { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: s[1] }, s[0]);
-        addBand('#band-neuroparsec', 74, -1);
-        addBand('#band-ccb', 82, 1);
-        s = seg(90, 97);
-        tl.fromTo('#card-leadership', { autoAlpha: 0, y: 36 }, { autoAlpha: 1, y: 0, duration: s[1] }, s[0]);
-        s = seg(94, 101);
-        tl.fromTo('#card-playground', { autoAlpha: 0, y: 36 }, { autoAlpha: 1, y: 0, duration: s[1] }, s[0]);
+        addCard('#card-neuroparsec', 74, 88);
+        addCard('#card-ccb', 82, 96);
+        addCard('#card-leadership', 90, 97);
+        addCard('#card-playground', 94, 101);
         s = seg(176, 184);
         tl.fromTo('.chair-title, .chair-desc, .coffee-beat', { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: s[1] }, s[0]);
         s = seg(182, 189);
