@@ -171,7 +171,9 @@ button {
   pointer-events: none;
   overflow: hidden;
   z-index: 1;
-  background-color: #000000;
+  /* Deep-navy radial scene gradient (concept H10): the film's fade-out now
+     dissolves into a navy scene instead of switching off against pure black. */
+  background: radial-gradient(120% 90% at 50% 42%, #0a1428 0%, #060b18 78%);
 }
 
 #hero-canvas {
@@ -590,8 +592,7 @@ button {
   font-size: clamp(2.2rem, 4.6vw, 4.2rem);
   font-weight: 800;
   letter-spacing: 0.32em;
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.88);
+  color: #ffffff;
   text-shadow: 0 0 32px rgba(56, 189, 248, 0.45);
   margin-top: -6px;
   margin-left: 4px;
@@ -664,19 +665,18 @@ button {
   height: 100%;
 }
 
-/* As Featured In Strip */
+/* As Featured In: static row of the outlets' original logos (concept H2).
+   No marquee, no motion at any width. Logos are the outlets' own files,
+   rendered monochrome white via filter. */
 .featured-strip {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 12px 20px;
-  margin-top: 10px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(14, 25, 48, 0.45) 100%);
-  border: 1px solid var(--glass-border);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px 30px;
+  padding: 16px 6px 2px;
+  margin-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
   max-width: 580px;
 }
 
@@ -691,45 +691,21 @@ button {
 }
 
 .featured-outlets {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 26px, #000 calc(100% - 30px), transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0, #000 26px, #000 calc(100% - 30px), transparent 100%);
-  padding-left: 26px;
-}
-
-.marquee-track {
   display: flex;
-  width: max-content;
-  flex-wrap: nowrap;
-  animation: marqueeScroll 22s linear 1.6s infinite;
-  will-change: transform;
+  align-items: center;
+  gap: 30px;
 }
 
-.featured-strip:hover .marquee-track {
-  animation-play-state: paused;
+.featured-logo {
+  display: block;
+  width: auto;
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
 }
 
-@keyframes marqueeScroll {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
-}
-
-.outlet-item {
-  font-size: 0.86rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-  letter-spacing: -0.01em;
-  transition: color 0.2s;
-  white-space: nowrap;
-  padding-right: 34px; /* spacing inside items so -50% loops seamlessly */
-  flex-shrink: 0;
-}
-
-.outlet-item:hover {
-  color: var(--accent-cyan);
-}
+.featured-logo--pa { height: 27px; }
+.featured-logo--tbs { height: 36px; }
+.featured-logo--bdn { height: 20px; }
 
 /* ==========================================================================
    SECTION 2: AT A GLANCE
@@ -951,10 +927,10 @@ button {
 }
 
 .story-line.is-past {
-  /* previous line fades out first (no delay), stays as a faint trail on desktop */
-  opacity: 0.16;
+  /* previous line fades out first (no delay), stays as a legible trail on desktop */
+  opacity: 0.34;
   transform: translate3d(0, 0, 0);
-  filter: blur(0.5px);
+  filter: blur(0);
   clip-path: inset(0 0 0 0);
   transition-delay: 0s;
 }
@@ -1025,53 +1001,6 @@ button {
   max-width: 500px;
 }
 
-.steam-emitter {
-  position: absolute;
-  top: -46px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 50px;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.steam-path {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.65);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 20 80;
-  animation: steamRise 3s ease-out infinite;
-  filter: drop-shadow(0 0 8px rgba(186, 230, 253, 0.8));
-}
-
-.steam-path:nth-child(2) {
-  animation-delay: 0.7s;
-  stroke-width: 2.5;
-}
-
-.steam-path:nth-child(3) {
-  animation-delay: 1.4s;
-  stroke-width: 1.8;
-}
-
-@keyframes steamRise {
-  0% {
-    stroke-dashoffset: 100;
-    opacity: 0;
-    transform: translateY(6px) scale(0.9);
-  }
-  30% {
-    opacity: 0.75;
-  }
-  100% {
-    stroke-dashoffset: -40;
-    opacity: 0;
-    transform: translateY(-28px) scale(1.15);
-  }
-}
-
 .mug-body {
   position: relative;
   padding: 30px 28px 32px 28px;
@@ -1091,21 +1020,6 @@ button {
 
 .mug-body:focus-within {
   box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.28);
-}
-
-.mug-handle {
-  position: absolute;
-  top: 45px;
-  right: -36px;
-  width: 52px;
-  height: 120px;
-  border: 7px solid rgba(255, 255, 255, 0.16);
-  border-left: none;
-  border-radius: 0 45px 45px 0;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent 0%, rgba(14, 25, 48, 0.35) 100%);
-  box-shadow: 12px 10px 24px -5px rgba(0, 0, 0, 0.5);
-  backdrop-filter: var(--glass-blur);
 }
 
 .mug-header {
@@ -1580,11 +1494,6 @@ body.menu-open { overflow: hidden; }
     display: none !important;
   }
 
-  /* Hide protruding mug handle on tablet & mobile */
-  .mug-handle {
-    display: none !important;
-  }
-
   /* Tablet 2-column card deck */
   .cards-deck {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -1634,6 +1543,7 @@ body.menu-open { overflow: hidden; }
       #060b18 100%);
   }
 
+
   .scene-section {
     padding: 0 18px 22px 18px;
     min-height: 100vh;
@@ -1662,8 +1572,20 @@ body.menu-open { overflow: hidden; }
   }
 
   /* ---------- 1. HERO ---------- */
+  /* Solid scene panel (concept H3): the whole hero text block sits on one
+     opaque surface anchored to the bottom of the first screen, so text
+     never prints across the portrait; the panel exits upward as one piece. */
   .hero-content {
     gap: 10px;
+    width: auto;
+    max-width: none;
+    margin-top: auto;
+    margin-left: -18px;
+    margin-right: -18px;
+    margin-bottom: -22px;
+    padding: 16px 18px 20px;
+    background: #060b18;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .eyebrow {
@@ -1698,11 +1620,10 @@ body.menu-open { overflow: hidden; }
     letter-spacing: 0.1em;
     margin-top: 0;
     margin-left: 2px;
-    -webkit-text-stroke: 1.2px rgba(255, 255, 255, 0.9);
   }
 
   .hero-tagline {
-    font-size: 15.5px;
+    font-size: 14.5px;
     line-height: 1.45;
     max-width: 100%;
   }
@@ -1744,29 +1665,26 @@ body.menu-open { overflow: hidden; }
   .featured-strip {
     width: 100%;
     max-width: 100%;
-    padding: 8px 0 8px 12px;
-    margin-top: 2px;
-    gap: 0;
-    border-radius: 12px;
-    overflow: hidden;
+    padding: 12px 0 0;
+    margin-top: 4px;
+    gap: 8px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    justify-content: flex-start;
   }
 
   .featured-label {
     font-size: 8.5px;
     letter-spacing: 0.14em;
     flex-shrink: 0;
-    padding-right: 10px;
-    border-right: 1px solid rgba(255, 255, 255, 0.15);
   }
 
   .featured-outlets {
-    padding-left: 24px;
+    gap: 18px;
   }
 
-  .outlet-item {
-    font-size: 12px;
-    padding-right: 26px;
-  }
+  .featured-logo--pa { height: 20px; }
+  .featured-logo--tbs { height: 27px; }
+  .featured-logo--bdn { height: 15px; }
 
   /* ---------- 2. AT A GLANCE: 2x2 compact grid, fully on screen ---------- */
   .glance-content {
@@ -1844,7 +1762,9 @@ body.menu-open { overflow: hidden; }
     font-size: 9.5px;
   }
 
-  /* ---------- 3. STORY: pinned, one line at a time in the bottom area ---------- */
+  /* ---------- 3. STORY: pinned, one line at a time in the bottom area.
+     Step 2: the scene grows 200vh -> 240vh so the last line finishes its
+     read below the film band before the pinned frame lets go. ---------- */
   .story-scene {
     display: block;
     min-height: 240vh;
@@ -1939,12 +1859,6 @@ body.menu-open { overflow: hidden; }
     max-width: 100%;
     width: 100%;
     margin-top: 6px;
-  }
-
-  .steam-emitter {
-    top: -30px;
-    width: 90px;
-    height: 34px;
   }
 
   .mug-body {
@@ -2042,6 +1956,746 @@ body.menu-open { overflow: hidden; }
   }
 }
 
+/* ==========================================================================
+   HOMEPAGE LIGHT POLISH (2026-11-09)
+   Scoped to the At a Glance deck and homepage footer. The hero, film canvas,
+   frame engine and hero text rules are intentionally not referenced here.
+   ========================================================================== */
+.glance-content {
+  gap: 26px;
+}
+
+.glance-scene .eyebrow {
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+}
+
+.glance-scene .scene-title {
+  letter-spacing: -0.01em;
+  text-shadow: 0 14px 36px rgba(0, 0, 0, 0.38);
+}
+
+.glance-scene .cards-deck {
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.glance-scene .deck-card {
+  padding: 25px 20px 22px;
+  border-color: rgba(186, 230, 253, 0.22);
+  border-radius: 22px;
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgba(56, 189, 248, 0.13) 0%, transparent 52%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.105) 0%, rgba(18, 32, 61, 0.72) 58%, rgba(8, 15, 31, 0.88) 100%);
+  box-shadow: 0 22px 48px -18px rgba(0, 0, 0, 0.82), inset 0 1px 0 rgba(255, 255, 255, 0.13);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.glance-scene .deck-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, transparent 34%);
+  pointer-events: none;
+}
+
+.glance-scene .deck-card:hover,
+.glance-scene .deck-card:focus-within {
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgba(56, 189, 248, 0.2) 0%, transparent 54%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.13) 0%, rgba(20, 38, 72, 0.78) 58%, rgba(9, 18, 36, 0.92) 100%);
+  border-color: rgba(125, 211, 252, 0.58);
+  box-shadow: 0 30px 62px -16px rgba(0, 0, 0, 0.88), 0 0 38px rgba(56, 189, 248, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.glance-scene .card-top {
+  margin-bottom: 19px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.085);
+}
+
+.glance-scene .card-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: linear-gradient(145deg, rgba(125, 211, 252, 0.2) 0%, rgba(56, 189, 248, 0.08) 100%);
+  border-color: rgba(125, 211, 252, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 8px 20px -10px rgba(56, 189, 248, 0.65);
+}
+
+.glance-scene .card-number {
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(226, 240, 255, 0.58);
+  line-height: 1;
+}
+
+.glance-scene .card-body {
+  gap: 9px;
+}
+
+.glance-scene .card-title {
+  line-height: 1.22;
+}
+
+.glance-scene .card-desc {
+  color: rgba(203, 220, 238, 0.82);
+  line-height: 1.55;
+}
+
+.glance-scene .card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.glance-scene .card-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 4px 7px;
+  border: 1px solid rgba(125, 211, 252, 0.24);
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.09);
+  color: rgba(186, 230, 253, 0.9);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.035em;
+  line-height: 1.25;
+}
+
+.glance-scene .card-link {
+  width: 100%;
+  margin-top: 19px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(255, 255, 255, 0.085);
+}
+
+.footer-section.home-footer .footer-panel {
+  border-color: rgba(186, 230, 253, 0.2);
+  border-radius: 30px;
+  background:
+    radial-gradient(90% 120% at 100% 0%, rgba(56, 189, 248, 0.1) 0%, transparent 55%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(14, 25, 48, 0.78) 100%);
+  box-shadow: 0 28px 64px -24px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.11);
+}
+
+.footer-section.home-footer .footer-tag {
+  color: rgba(125, 211, 252, 0.72);
+}
+
+.footer-section.home-footer .footer-heading {
+  text-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+.footer-section.home-footer .footer-links-list {
+  gap: 12px;
+}
+
+.footer-section.home-footer .social-btn {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(14, 25, 48, 0.5) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 1024px) {
+  .glance-scene .deck-card {
+    padding: 22px 18px 20px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .glance-content {
+    gap: 6px;
+  }
+
+  .glance-scene .eyebrow {
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+  }
+
+  .glance-scene .cards-deck {
+    gap: 10px;
+    margin-top: 0;
+  }
+
+  .glance-scene .deck-card {
+    min-height: 0;
+    padding: 13px 12px 12px;
+    border-radius: 17px;
+  }
+
+  .glance-scene .card-top {
+    margin-bottom: 9px;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .glance-scene .card-icon-wrap {
+    width: 31px;
+    height: 31px;
+    border-radius: 9px;
+  }
+
+  .glance-scene .card-number {
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  .glance-scene .card-tags {
+    gap: 4px;
+    margin-top: 7px;
+  }
+
+  .glance-scene .card-tag {
+    padding: 3px 6px;
+    font-size: 0.56rem;
+  }
+
+  .glance-scene .card-link {
+    margin-top: 10px;
+    padding-top: 8px;
+  }
+
+  .footer-section.home-footer .footer-panel {
+    border-radius: 20px;
+  }
+}
+
+/* ==========================================================================
+   CARD REDESIGN v2 - CANDIDATE A "CALM GRID" (2026-11-09)
+   Upright, larger, quieter. Active only when <body> carries .cards-a.
+   The fan rotations, float keyframes and entrance transforms in main.js are
+   neutralised by design (flat fan + zero-clearProps guard below); main.js
+   itself is untouched. The original deck rules above stay intact so the
+   backup restore is a pure file swap.
+   ========================================================================== */
+body.cards-a .glance-scene,
+body.cards-b .glance-scene {
+  isolation: isolate;
+}
+
+/* Section backing: a deep-navy field flows down from the film so the cards
+   read as set into the room, not pasted over the character. */
+body.cards-a .glance-scene::before,
+body.cards-b .glance-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(110% 55% at 50% 0%, rgba(56, 189, 248, 0.05) 0%, transparent 55%),
+    linear-gradient(180deg,
+      transparent 0%,
+      rgba(6, 11, 24, 0.35) 18%,
+      rgba(6, 11, 24, 0.82) 42%,
+      #060b18 62%,
+      #060b18 100%);
+  pointer-events: none;
+}
+
+body.cards-a .glance-content {
+  max-width: 1080px;
+  gap: 34px;
+}
+
+body.cards-a .cards-deck {
+  gap: 26px;
+  margin-top: 10px;
+  perspective: none;
+}
+
+body.cards-a .deck-card,
+body.cards-a .deck-card:nth-child(1),
+body.cards-a .deck-card:nth-child(2),
+body.cards-a .deck-card:nth-child(3),
+body.cards-a .deck-card:nth-child(4) {
+  transform: none;
+  animation: none;
+  min-height: 400px;
+  padding: 34px 30px 30px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1px solid rgba(255, 255, 255, 0.24);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.09) 0%, rgba(16, 29, 56, 0.62) 55%, rgba(9, 18, 38, 0.78) 100%);
+  box-shadow: 0 26px 55px -20px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: transform 0.4s var(--ease-out-expo), box-shadow 0.4s var(--ease-out-expo), border-color 0.3s, background 0.3s;
+}
+
+body.cards-a .deck-card.floating {
+  animation: none;
+}
+
+body.cards-a .deck-card:hover {
+  animation: none !important;
+  transform: translateY(-8px) !important;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.12) 0%, rgba(20, 38, 72, 0.72) 55%, rgba(10, 21, 44, 0.85) 100%);
+  border-color: rgba(125, 211, 252, 0.5);
+  box-shadow: 0 34px 64px -18px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.18);
+}
+
+body.cards-a .card-top {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+}
+
+body.cards-a .card-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+}
+
+body.cards-a .card-icon-wrap svg {
+  width: 26px;
+  height: 26px;
+}
+
+body.cards-a .card-body {
+  gap: 12px;
+}
+
+body.cards-a .card-title {
+  font-size: 1.42rem;
+  line-height: 1.18;
+}
+
+body.cards-a .card-desc {
+  font-size: 0.97rem;
+  line-height: 1.6;
+  color: rgba(211, 226, 243, 0.85);
+}
+
+body.cards-a .card-tags {
+  gap: 8px;
+  margin-top: 14px;
+}
+
+body.cards-a .card-tag {
+  padding: 6px 11px;
+  font-size: 0.68rem;
+}
+
+body.cards-a .card-link {
+  margin-top: 26px;
+  padding-top: 18px;
+  font-size: 0.74rem;
+}
+
+/* Entrance end-state guard: if main.js clears inline transforms after its
+   fan animation (it does), floating cards must never re-rotate. */
+body.cards-a .deck-card.is-tilting {
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-8px) !important;
+}
+
+@media (max-width: 1024px) {
+  body.cards-a .glance-content { max-width: 860px; }
+  body.cards-a .cards-deck { gap: 20px; }
+  body.cards-a .deck-card,
+  body.cards-a .deck-card:nth-child(1),
+  body.cards-a .deck-card:nth-child(2),
+  body.cards-a .deck-card:nth-child(3),
+  body.cards-a .deck-card:nth-child(4) {
+    min-height: 360px;
+    padding: 28px 24px 26px;
+  }
+}
+
+/* Version A - phones: one calm column on its own solid navy band, clear of
+   the portrait zone the canvas paints. */
+@media (max-width: 767.98px) {
+  body.cards-a .glance-scene {
+    padding-top: 100dvh;
+    overflow-x: clip;
+  }
+
+  body.cards-a .glance-scene::before {
+    top: auto;
+    bottom: 0;
+    height: calc(100% - 100dvh + 180px);
+    background: #060b18;
+  }
+
+  body.cards-a .glance-content {
+    gap: 20px;
+  }
+
+  body.cards-a .cards-deck {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    margin-top: 6px;
+  }
+
+  body.cards-a .deck-card,
+  body.cards-a .deck-card:nth-child(1),
+  body.cards-a .deck-card:nth-child(2),
+  body.cards-a .deck-card:nth-child(3),
+  body.cards-a .deck-card:nth-child(4) {
+    min-height: 0 !important;
+    padding: 22px 20px 20px !important;
+    border-radius: 20px !important;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, rgba(13, 24, 48, 0.88) 60%, rgba(8, 15, 31, 0.95) 100%);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transform: none !important;
+    animation: none !important;
+  }
+
+  body.cards-a .deck-card:hover { transform: none !important; }
+
+  body.cards-a .card-top {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+  }
+
+  body.cards-a .card-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  body.cards-a .card-icon-wrap svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  body.cards-a .card-number {
+    padding: 5px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(255, 255, 255, 0.045);
+  }
+
+  body.cards-a .card-body { gap: 8px; }
+
+  body.cards-a .card-title { font-size: 1.16rem; }
+
+  body.cards-a .card-desc {
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  body.cards-a .card-tags {
+    gap: 6px;
+    margin-top: 9px;
+  }
+
+  body.cards-a .card-tag {
+    padding: 5px 9px;
+    font-size: 0.64rem;
+  }
+
+  body.cards-a .card-link {
+    margin-top: 16px;
+    padding-top: 13px;
+    font-size: 0.7rem;
+  }
+}
+
+/* ==========================================================================
+   CARD REDESIGN v2 - CANDIDATE B "EDITORIAL ROW" (2026-11-09)
+   Active only when <body> carries .cards-b. NeuroParsec becomes a wide
+   feature card (visual field left, editorial text right); the other three
+   ventures sit beneath it in one calm row. Upright, no tilt, bigger type.
+   The feature card's .card-visual exists in the DOM for both candidates
+   and is only displayed here.
+   ========================================================================== */
+.card-visual { display: none; }
+
+body.cards-b .glance-content {
+  max-width: 1080px;
+  gap: 34px;
+}
+
+body.cards-b .cards-deck {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 10px;
+  perspective: none;
+}
+
+body.cards-b .deck-card,
+body.cards-b .deck-card:nth-child(1),
+body.cards-b .deck-card:nth-child(2),
+body.cards-b .deck-card:nth-child(3),
+body.cards-b .deck-card:nth-child(4) {
+  transform: none;
+  animation: none;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1px solid rgba(255, 255, 255, 0.24);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.09) 0%, rgba(16, 29, 56, 0.62) 55%, rgba(9, 18, 38, 0.78) 100%);
+  box-shadow: 0 26px 55px -20px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: transform 0.4s var(--ease-out-expo), box-shadow 0.4s var(--ease-out-expo), border-color 0.3s, background 0.3s;
+}
+
+body.cards-b .deck-card.floating { animation: none; }
+
+body.cards-b .deck-card {
+  min-height: 380px;
+  padding: 32px 28px 28px;
+  border-radius: 24px;
+}
+
+body.cards-b .deck-card:hover {
+  animation: none !important;
+  transform: translateY(-8px) !important;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.12) 0%, rgba(20, 38, 72, 0.72) 55%, rgba(10, 21, 44, 0.85) 100%);
+  border-color: rgba(125, 211, 252, 0.5);
+  box-shadow: 0 34px 64px -18px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.18);
+}
+
+body.cards-b .card-top {
+  margin-bottom: 26px;
+  padding-bottom: 18px;
+}
+
+body.cards-b .card-icon-wrap {
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+}
+
+body.cards-b .card-icon-wrap svg {
+  width: 25px;
+  height: 25px;
+}
+
+body.cards-b .card-body { gap: 11px; }
+
+body.cards-b .card-title {
+  font-size: 1.34rem;
+  line-height: 1.18;
+}
+
+body.cards-b .card-desc {
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: rgba(211, 226, 243, 0.85);
+}
+
+body.cards-b .card-tags {
+  gap: 8px;
+  margin-top: 13px;
+}
+
+body.cards-b .card-tag {
+  padding: 6px 11px;
+  font-size: 0.68rem;
+}
+
+body.cards-b .card-link {
+  margin-top: 24px;
+  padding-top: 17px;
+  font-size: 0.74rem;
+}
+
+/* --- the feature card: NeuroParsec, full width, editorial split --- */
+body.cards-b #card-neuroparsec {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(300px, 42%) 1fr;
+  grid-template-rows: auto 1fr auto;
+  column-gap: 44px;
+  min-height: 340px;
+  padding: 40px 44px 36px;
+}
+
+body.cards-b #card-neuroparsec .card-visual {
+  display: flex;
+  grid-row: 1 / -1;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  border: 1px solid rgba(125, 211, 252, 0.25);
+  background:
+    radial-gradient(90% 90% at 50% 38%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0.05) 55%, transparent 78%),
+    linear-gradient(150deg, rgba(125, 211, 252, 0.1) 0%, rgba(10, 20, 42, 0.55) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: var(--accent-cyan);
+  min-height: 250px;
+}
+
+body.cards-b #card-neuroparsec .card-visual svg {
+  width: 118px;
+  height: 118px;
+  stroke: currentColor;
+  fill: none;
+  opacity: 0.92;
+  filter: drop-shadow(0 0 22px rgba(56, 189, 248, 0.45));
+}
+
+body.cards-b #card-neuroparsec .card-top {
+  margin-bottom: 22px;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+body.cards-b #card-neuroparsec .card-icon-wrap { display: none; }
+
+body.cards-b #card-neuroparsec .card-number {
+  font-size: 0.8rem;
+  padding: 7px 11px;
+}
+
+body.cards-b #card-neuroparsec .card-title {
+  font-size: 2.05rem;
+  letter-spacing: -0.015em;
+}
+
+body.cards-b #card-neuroparsec .card-desc {
+  font-size: 1.06rem;
+  line-height: 1.65;
+  max-width: 34ch;
+}
+
+body.cards-b #card-neuroparsec .card-tags { margin-top: 16px; }
+
+body.cards-b #card-neuroparsec .card-tag {
+  padding: 7px 13px;
+  font-size: 0.72rem;
+}
+
+body.cards-b #card-neuroparsec .card-link {
+  margin-top: 28px;
+  font-size: 0.8rem;
+}
+
+body.cards-b .deck-card.is-tilting {
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-8px) !important;
+}
+
+@media (max-width: 1024px) {
+  body.cards-b .glance-content { max-width: 860px; }
+  body.cards-b .cards-deck { gap: 20px; }
+  body.cards-b .deck-card { min-height: 350px; padding: 28px 24px 26px; }
+  body.cards-b #card-neuroparsec { padding: 34px 32px 30px; column-gap: 34px; }
+}
+
+/* Version B - phones: feature card first (visual panel on top), then the
+   same calm single column on the solid navy band as Version A. */
+@media (max-width: 767.98px) {
+  body.cards-b .glance-scene {
+    padding-top: 100dvh;
+    overflow-x: clip;
+  }
+
+  body.cards-b .glance-scene::before {
+    top: auto;
+    bottom: 0;
+    height: calc(100% - 100dvh + 180px);
+    background: #060b18;
+  }
+
+  body.cards-b .glance-content { gap: 20px; }
+
+  body.cards-b .cards-deck {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    margin-top: 6px;
+  }
+
+  body.cards-b .deck-card,
+  body.cards-b .deck-card:nth-child(1),
+  body.cards-b .deck-card:nth-child(2),
+  body.cards-b .deck-card:nth-child(3),
+  body.cards-b .deck-card:nth-child(4) {
+    min-height: 0 !important;
+    padding: 22px 20px 20px !important;
+    border-radius: 20px !important;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, rgba(13, 24, 48, 0.88) 60%, rgba(8, 15, 31, 0.95) 100%);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transform: none !important;
+    animation: none !important;
+  }
+
+  body.cards-b .deck-card:hover { transform: none !important; }
+
+  body.cards-b .card-top {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+  }
+
+  body.cards-b .card-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  body.cards-b .card-icon-wrap svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  body.cards-b .card-number {
+    padding: 5px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(255, 255, 255, 0.045);
+  }
+
+  body.cards-b .card-body { gap: 8px; }
+  body.cards-b .card-title { font-size: 1.16rem; }
+
+  body.cards-b .card-desc {
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  body.cards-b .card-tags {
+    gap: 6px;
+    margin-top: 9px;
+  }
+
+  body.cards-b .card-tag {
+    padding: 5px 9px;
+    font-size: 0.64rem;
+  }
+
+  body.cards-b .card-link {
+    margin-top: 16px;
+    padding-top: 13px;
+    font-size: 0.7rem;
+  }
+
+  body.cards-b #card-neuroparsec {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 20px 20px !important;
+  }
+
+  body.cards-b #card-neuroparsec .card-visual {
+    display: flex;
+    min-height: 132px;
+    margin-bottom: 18px;
+    border-radius: 15px;
+  }
+
+  body.cards-b #card-neuroparsec .card-visual svg {
+    width: 62px;
+    height: 62px;
+  }
+
+  body.cards-b #card-neuroparsec .card-top {
+    order: 2;
+    margin-bottom: 10px;
+    padding-bottom: 0;
+  }
+
+  body.cards-b #card-neuroparsec .card-body { order: 3; }
+  body.cards-b #card-neuroparsec .card-link { order: 4; }
+
+  body.cards-b #card-neuroparsec .card-title { font-size: 1.42rem; }
+
+  body.cards-b #card-neuroparsec .card-desc {
+    font-size: 0.96rem;
+    max-width: none;
+  }
+}
+
 /* Reduced Motion Mode */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
@@ -2054,10 +2708,1381 @@ body.menu-open { overflow: hidden; }
     animation: none !important;
     transform: none !important;
   }
-  .marquee-track {
-    animation: none !important;
-  }
   .hero-name-serif .char, .hero-name-outline .char, .hero-tagline, .hero-pills .glass-pill, .hero-content .eyebrow, .hero-content .featured-strip { animation: none !important; }
   .story-line { filter: none !important; clip-path: none !important; transform: none !important; }
   .nav-cta::after, .btn-reserve::after, .footer-chair-btn::after, .mug-body::before { animation: none !important; }
+}
+
+/* Short phones (concept H3): step the name down one size so the hero
+   panel always fits the first screen. */
+@media (max-width: 767.98px) and (max-height: 740px) {
+  .hero-content {
+    gap: 8px;
+    padding-top: 12px;
+    padding-bottom: 14px;
+  }
+
+  .hero-name-serif {
+    font-size: clamp(38px, 11.5vw, 48px);
+  }
+
+  .hero-name-outline {
+    font-size: clamp(21px, 6.2vw, 26px);
+  }
+
+  .hero-tagline {
+    font-size: 13.5px;
+  }
+}
+
+/* ==========================================================================
+   PART 3-6 PASS (2026-11-09): hero CTA, cards-d deck, story chapters,
+   chair panel, footer trims. Scoped so earlier candidate blocks stay
+   dormant. Film presentation rules are untouched.
+   ========================================================================== */
+
+/* --- Hero CTA: the hero's single primary action (site accent, one use) --- */
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  padding: 14px 30px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.85) 0%, rgba(2, 132, 199, 0.95) 100%);
+  border: 1px solid rgba(186, 230, 253, 0.55);
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(56, 189, 248, 0.32);
+  transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s, background 0.3s;
+}
+
+.hero-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(56, 189, 248, 0.48);
+}
+
+@media (max-width: 767.98px) {
+  .hero-cta { align-self: stretch; }
+}
+
+/* ==========================================================================
+   CARD REDESIGN v4 - "FILM DECK" (body.cards-d)
+   Hard Horizon arrival: the glance section is solid #060b18 from its first
+   pixel. Two large flat cards carry the ORIGINAL NeuroParsec and Cancer
+   CARE Bangladesh (CCB) logos, unaltered, on frosted glass tiles; the card
+   surfaces themselves stay flat (no glass, no blur, no shadow). Leadership
+   and Playground sit beneath as quiet index rows. Whole card is the link.
+   ========================================================================== */
+body.cards-d .glance-scene { isolation: isolate; }
+
+body.cards-d .glance-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #060b18;
+  box-shadow: inset 0 1px 0 rgba(125, 211, 252, 0.16);
+  pointer-events: none;
+}
+
+body.cards-d .glance-content {
+  max-width: 1160px;
+  margin: 0 auto;
+  gap: 30px;
+  padding-top: 2vh;
+}
+
+body.cards-d .cards-deck {
+  display: grid;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 22px;
+  margin-top: 16px;
+  perspective: none;
+}
+
+body.cards-d .deck-card,
+body.cards-d .deck-card:nth-child(1),
+body.cards-d .deck-card:nth-child(2),
+body.cards-d .deck-card:nth-child(3),
+body.cards-d .deck-card:nth-child(4) {
+  transform: none;
+  animation: none;
+  background: #0a1424;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+body.cards-d .glance-scene .deck-card::before { display: none; }
+
+body.cards-d .deck-card.floating { animation: none; }
+
+body.cards-d .deck-card:hover {
+  transform: none !important;
+  background: #0c1729;
+  border-color: rgba(125, 211, 252, 0.32);
+  box-shadow: none;
+}
+
+body.cards-d .deck-card.is-tilting { transform: none !important; }
+body.cards-d .deck-card::after { display: none !important; }
+
+/* --- the two feature cards --- */
+body.cards-d .deck-card--feature {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 492px;
+  padding: 26px 26px 24px;
+  border-radius: 20px;
+}
+
+/* Frosted glass logo tile: the original logos sit unaltered on a light
+   glass slab (their dark wordmarks need the light ground), hairline
+   border, soft inner light from the top edge. */
+body.cards-d .card-logo-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 186px;
+  padding: 20px 26px;
+  border-radius: 16px;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.96) 0%, rgba(228, 240, 251, 0.9) 55%, rgba(205, 226, 246, 0.87) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -20px 32px rgba(148, 197, 255, 0.16),
+    0 18px 34px -18px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+body.cards-d .card-logo-tile img {
+  display: block;
+  object-fit: contain;
+}
+
+body.cards-d #card-neuroparsec .card-logo-tile img {
+  height: 142px;
+  width: auto;
+  max-width: 94%;
+}
+
+body.cards-d #card-ccb .card-logo-tile img {
+  height: 142px;
+  width: 142px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+body.cards-d .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+body.cards-d .card-number {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.38);
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  line-height: 1;
+}
+
+body.cards-d .card-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.85rem, 2.5vw, 2.35rem);
+  line-height: 1.12;
+  letter-spacing: 0;
+  color: #ffffff;
+}
+
+body.cards-d .card-desc {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: rgba(203, 220, 238, 0.82);
+}
+
+body.cards-d .card-foot {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+body.cards-d .card-link {
+  width: auto;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  font-size: 0.74rem;
+}
+
+/* --- the two index rows --- */
+body.cards-d .deck-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 18px;
+  min-height: 0;
+  padding: 18px 22px;
+  border-radius: 16px;
+}
+
+body.cards-d .row-icon {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(186, 230, 253, 0.9);
+}
+
+body.cards-d .row-icon svg {
+  width: 23px;
+  height: 23px;
+  stroke: currentColor;
+  fill: none;
+}
+
+body.cards-d .row-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+body.cards-d .row-title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+body.cards-d .row-desc {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.cards-d .row-arrow {
+  color: var(--accent-cyan);
+  font-size: 1.1rem;
+  transition: transform 0.25s;
+}
+
+body.cards-d .deck-row:hover .row-arrow { transform: translateX(4px); }
+
+@media (max-width: 1024px) {
+  body.cards-d .glance-content { max-width: 920px; }
+  body.cards-d .deck-card--feature { min-height: 460px; }
+}
+
+/* Phones: the portrait keeps its own full zone first (the established
+   separation), then the solid band carries one stacked column. */
+@media (max-width: 767.98px) {
+  body.cards-d .glance-scene {
+    padding-top: 100dvh;
+    overflow-x: clip;
+  }
+
+  body.cards-d .glance-scene::before {
+    top: auto;
+    bottom: 0;
+    height: calc(100% - 100dvh + 180px);
+    box-shadow: none;
+  }
+
+  body.cards-d .glance-content {
+    margin: 0;
+    max-width: 100%;
+    gap: 20px;
+    padding-top: 0;
+  }
+
+  body.cards-d .cards-deck {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+    margin-top: 6px;
+  }
+
+  body.cards-d .deck-card--feature {
+    min-height: 0;
+    padding: 20px;
+  }
+
+  body.cards-d .card-logo-tile {
+    height: 152px;
+    padding: 16px 20px;
+  }
+
+  body.cards-d #card-neuroparsec .card-logo-tile img { height: 114px; }
+  body.cards-d #card-ccb .card-logo-tile img { height: 114px; width: 114px; }
+
+  body.cards-d .card-body { margin-top: 18px; }
+  body.cards-d .card-title { font-size: 1.65rem; }
+  body.cards-d .card-desc { font-size: 0.95rem; }
+
+  body.cards-d .deck-row { padding: 16px 18px; }
+  body.cards-d .row-desc { white-space: normal; }
+}
+
+/* ==========================================================================
+   STORY: entry veil + numbered chapter strip (desktop) / counter (mobile)
+   ========================================================================== */
+.story-scene::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 18vh;
+  background: linear-gradient(180deg, #060b18 0%, rgba(6, 11, 24, 0.55) 45%, rgba(6, 11, 24, 0) 100%);
+  pointer-events: none;
+}
+
+.story-content { z-index: 1; }
+
+.chapter-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -84px;
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 14px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chapter-strip li {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-right: 16px;
+  opacity: 0.4;
+  transition: opacity 0.4s ease;
+}
+
+.chapter-strip li:last-child { padding-right: 0; }
+
+.chapter-strip li.is-active { opacity: 1; }
+
+.chapter-strip .ch-num {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.chapter-strip li.is-active .ch-num { color: var(--accent-cyan); }
+
+.chapter-strip .ch-name {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.chapter-counter { display: none; }
+
+@media (min-width: 768px) {
+  .story-scene { padding-bottom: 170px; }
+}
+
+@media (max-width: 767.98px) {
+  .story-scene::before { height: 12vh; }
+  .chapter-strip { display: none; }
+
+  .chapter-counter {
+    display: block;
+    position: absolute;
+    top: 9vh;
+    left: 0;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: rgba(255, 255, 255, 0.85);
+  }
+}
+
+/* ==========================================================================
+   CHAIR: solid scene panel + the one-word beat; FOOTER: trims + strip
+   ========================================================================== */
+.chair-panel {
+  background: #0a1424;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 24px;
+  padding: 38px 36px 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.chair-panel .chair-title {
+  font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+  text-wrap: balance;
+}
+
+.coffee-beat {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 1;
+  color: #ffffff;
+  margin: 0;
+}
+
+.chair-panel .mug-form-wrapper {
+  margin-top: 0;
+  max-width: 100%;
+}
+
+/* The form card sits on the opaque panel now: its backdrop blur only
+   sampled the panel, so it is pure cost. Off. (Perf pass.) */
+.mug-body {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (max-width: 767.98px) {
+  .chair-panel {
+    padding: 22px 18px 20px;
+    border-radius: 20px;
+    gap: 12px;
+  }
+
+  .coffee-beat { font-size: 40px; }
+}
+
+.worked-with {
+  max-width: 1200px;
+  margin: 0 auto 26px;
+  padding-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px 26px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.worked-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.worked-names {
+  display: flex;
+  gap: 12px 26px;
+  flex-wrap: wrap;
+}
+
+.worked-names span {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+@media (min-width: 768px) {
+  .footer-section { padding-top: 52px; }
+}
+
+/* Reduced motion: the film's poster cuts are driven in JS; the canvas
+   itself must never CSS-transition its opacity under this branch. */
+@media (prefers-reduced-motion: reduce) {
+  #hero-canvas { transition: none !important; }
+}
+
+/* ==========================================================================
+   VENTURE REDESIGN (Boss order, 9 Nov 22:01-22:07): glass logo chips in the
+   hero pills, bands, rows and footer; "Where I build." becomes two scene
+   bands (the card system with big light tiles is deleted); the footer is
+   FLAT (hairline only, so the chair panel stands alone) and its duplicate
+   "Pull Up a Chair" button is gone; one guided-next band sits above the
+   footer. Film rules untouched. This block is last in the file on purpose.
+   ========================================================================== */
+
+/* ---------- Glass chips: one family ---------- */
+.glass-chip {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(125, 211, 252, 0.22) 0%, rgba(20, 38, 72, 0.55) 60%, rgba(10, 20, 40, 0.68) 100%);
+  border: 1px solid rgba(186, 230, 253, 0.40);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.30), inset 0 -8px 14px rgba(56, 189, 248, 0.12), 0 4px 14px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.glass-chip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, transparent 46%);
+  pointer-events: none;
+}
+.glass-chip img {
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+.glass-chip--np img {
+  width: 78%;
+  height: auto;
+}
+.glass-chip--fill img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Hero pill chips: 26px desktop; phone size in the mobile block below. */
+.pill-icon.glass-chip {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+}
+
+/* Band chips. */
+.glass-chip--band {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+
+/* Row chips: the deck rows keep their 46px box, now a glass tile. */
+body.cards-d .row-icon.glass-chip {
+  padding: 0;
+  border-radius: 12px;
+  border-color: rgba(186, 230, 253, 0.34);
+}
+
+/* Footer chips + icon alignment in the EXPLORE list. */
+.glass-chip--footer {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+}
+.footer-links-list a {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+/* ---------- Venture bands (replaces the two feature cards) ---------- */
+.venture-bands {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 16px;
+}
+body.cards-d .venture-bands + .cards-deck {
+  margin-top: -8px;
+}
+
+.venture-band {
+  position: relative;
+  display: flex;
+  min-height: 336px;
+  border-radius: 22px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  background: #0a1424;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  isolation: isolate;
+  transition: border-color 0.35s ease;
+}
+.venture-band:hover,
+.venture-band:focus-visible {
+  border-color: rgba(125, 211, 252, 0.42);
+}
+
+.band-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.band-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.band-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(6, 11, 24, 0.90) 0%, rgba(6, 11, 24, 0.66) 48%, rgba(6, 11, 24, 0.22) 100%),
+    linear-gradient(0deg, rgba(6, 11, 24, 0.60) 0%, transparent 52%);
+  transition: opacity 0.5s ease;
+}
+.venture-band:hover .band-shade {
+  opacity: 0.86;
+}
+
+.band-numeral {
+  position: absolute;
+  z-index: 1;
+  top: 2px;
+  right: 30px;
+  font-family: var(--font-serif);
+  font-size: clamp(6.5rem, 11vw, 10rem);
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+@supports (-webkit-text-stroke: 1px black) {
+  .band-numeral {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.30);
+  }
+}
+
+.band-inner {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 13px;
+  padding: 30px 34px;
+}
+.band-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.band-name {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.1rem, 4.2vw, 3.3rem);
+  line-height: 1.04;
+  color: #ffffff;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+.band-desc {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: rgba(219, 233, 248, 0.88);
+  max-width: 44ch;
+}
+.band-explore {
+  position: relative;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 4px;
+  padding-bottom: 7px;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+}
+.band-explore::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  opacity: 0.9;
+  transform: scaleX(0.30);
+  transform-origin: left center;
+  transition: transform 0.5s var(--ease-out-expo);
+}
+.venture-band:hover .band-explore::after,
+.venture-band:focus-visible .band-explore::after,
+.journey-next:hover .band-explore::after,
+.journey-next:focus-visible .band-explore::after {
+  transform: scaleX(1);
+}
+.band-arrow {
+  display: inline-block;
+  transition: transform 0.3s var(--ease-out-expo);
+}
+.venture-band:hover .band-arrow,
+.venture-band:focus-visible .band-arrow,
+.journey-next:hover .band-arrow,
+.journey-next:focus-visible .band-arrow {
+  transform: translateX(5px);
+}
+
+/* Scroll-driven reveal: clip-path wipe + slow ken-burns on the backdrop,
+   staggered rise on the content. Outside @supports everything is simply
+   visible; reduced motion disables it entirely. */
+@supports (animation-timeline: view()) {
+  .band-media {
+    animation: bandWipe linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 60%;
+  }
+  .band-media img {
+    animation: bandKen linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 50%;
+  }
+  .band-rise {
+    animation: bandRise linear both;
+    animation-timeline: view();
+  }
+  .band-rise--1 { animation-range: entry 6% entry 46%; }
+  .band-rise--2 { animation-range: entry 12% entry 54%; }
+  .band-rise--3 { animation-range: entry 19% entry 61%; }
+  .band-rise--4 { animation-range: entry 26% entry 68%; }
+}
+@keyframes bandWipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes bandKen {
+  from { transform: scale(1.14); }
+  to { transform: scale(1); }
+}
+@keyframes bandRise {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .band-media,
+  .band-media img,
+  .band-rise {
+    animation: none !important;
+  }
+}
+
+/* ---------- Guided next: one line, one arrow, flat and open ---------- */
+.journey-next {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 58px 8% 50px;
+  text-decoration: none;
+  color: inherit;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  background:
+    radial-gradient(60% 120% at 18% 0%, rgba(56, 189, 248, 0.07) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(6, 11, 24, 0) 0%, rgba(6, 11, 24, 0.55) 60%, rgba(6, 11, 24, 0.82) 100%);
+}
+.journey-line {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.85rem, 4.2vw, 3.1rem);
+  line-height: 1.12;
+  color: #ffffff;
+}
+.journey-line em {
+  font-style: italic;
+  color: rgba(186, 230, 253, 0.95);
+}
+@media (min-width: 768px) {
+  .footer-section.home-footer {
+    padding-top: 56px;
+  }
+}
+
+/* ---------- Footer: FLAT. No panel, no radius, no shadow. The single
+   hairline is the WORKED WITH strip's bottom border above it. ---------- */
+.footer-section.home-footer .footer-panel {
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 38px 0 0;
+}
+
+/* ---------- Phone pass ---------- */
+@media (max-width: 767.98px) {
+  .pill-icon.glass-chip {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+  }
+  .venture-bands {
+    gap: 16px;
+    margin-top: 6px;
+    margin-left: -18px;
+    margin-right: -18px;
+  }
+  body.cards-d .venture-bands + .cards-deck {
+    margin-top: -2px;
+  }
+  .venture-band {
+    min-height: 302px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  .band-inner {
+    padding: 24px 20px 26px;
+    gap: 11px;
+  }
+  .band-name {
+    font-size: 1.95rem;
+  }
+  .band-desc {
+    font-size: 0.94rem;
+  }
+  .band-numeral {
+    font-size: 6.2rem;
+    right: 16px;
+    top: 0;
+  }
+  .glass-chip--band {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+  }
+  .journey-next {
+    padding: 44px 18px 40px;
+  }
+  .footer-section.home-footer .footer-panel {
+    background: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 30px 0 0;
+  }
+}
+
+/* ==========================================================================
+   ABOUT PAGE: 10-scene storyboard (2026-11-09 rebuild, scoped to body.about-page)
+   ========================================================================== */
+.about-page .ab-wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.about-page .ab-scene {
+  padding: 60px 0;
+}
+.about-page .ab-h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 4.6vw, 3.3rem);
+  line-height: 1.16;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin: 0 0 22px;
+}
+.about-page .ab-h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin: 0 0 40px;
+}
+.about-page .ab-lede {
+  font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+  line-height: 1.65;
+  color: var(--text-secondary);
+  max-width: 540px;
+  margin: 0;
+}
+
+/* Scene 1: hero */
+.about-page .ab-hero {
+  padding-top: 12px;
+}
+.about-page .ab-hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: center;
+}
+.about-page .ab-hero-media img {
+  width: 100%;
+  display: block;
+  border-radius: 24px;
+}
+
+/* Scene 2: two worlds */
+.about-page .ab-worlds-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+.about-page .ab-world-media {
+  border-radius: 20px;
+  overflow: hidden;
+  aspect-ratio: 2 / 1;
+}
+.about-page .ab-world-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.about-page .ab-world-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 22px 0 10px;
+}
+.about-page .ab-world-brand img {
+  height: 38px;
+  width: auto;
+  border-radius: 9px;
+  display: block;
+}
+.about-page .ab-world-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  line-height: 1.25;
+  color: var(--text-primary);
+  margin: 0;
+}
+.about-page .ab-world-line {
+  color: var(--text-secondary);
+  line-height: 1.65;
+  font-size: 1rem;
+  margin: 0;
+  max-width: 440px;
+}
+
+/* Scene 3: full-bleed stage photo */
+.about-page .ab-stage {
+  margin: 0;
+}
+.about-page .ab-stage > img {
+  width: 100%;
+  display: block;
+}
+.about-page .ab-caption {
+  padding-top: 16px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* Scene 4: capability tiles (text only, no boxes) */
+.about-page .ab-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 42px 64px;
+}
+.about-page .ab-tile h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1.08rem;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+.about-page .ab-tile p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 0.99rem;
+  margin: 0;
+}
+.about-page .ab-support {
+  margin: 52px 0 0;
+  color: var(--text-secondary);
+  font-size: 1.02rem;
+}
+
+/* Scene 5: build rows */
+.about-page .ab-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 54px;
+}
+.about-page .ab-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.about-page .ab-row-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 15px;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+}
+.about-page .ab-row-main {
+  min-width: 0;
+}
+.about-page .ab-row-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.12rem, 2.2vw, 1.45rem);
+  line-height: 1.25;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+}
+.about-page .ab-row-line {
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+.about-page .ab-row-link {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--accent-ice);
+  font-weight: 500;
+  font-size: 0.98rem;
+  white-space: nowrap;
+  transition: color 0.25s ease;
+}
+.about-page .ab-row-link::after {
+  content: "\2192";
+  margin-left: 7px;
+  display: inline-block;
+  transition: transform 0.25s ease;
+}
+.about-page .ab-row-link:hover {
+  color: var(--accent-cyan);
+}
+.about-page .ab-row-link:hover::after {
+  transform: translateX(3px);
+}
+
+/* Scene 6: trainer */
+.about-page .ab-trainer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 52px;
+  align-items: center;
+}
+.about-page .ab-trainer-media img {
+  width: 100%;
+  display: block;
+  border-radius: 20px;
+}
+.about-page .ab-trainer-copy .ab-h2 {
+  margin-bottom: 26px;
+}
+.about-page .ab-chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+.about-page .ab-chips li {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 9px 17px;
+  font-size: 0.93rem;
+  color: var(--text-secondary);
+}
+
+/* Scene 7: the road */
+.about-page .ab-road {
+  position: relative;
+  margin-left: 150px;
+  border-left: 1px solid rgba(186, 230, 253, 0.22);
+}
+.about-page .ab-stop {
+  position: relative;
+  padding: 20px 0 20px 36px;
+}
+.about-page .ab-stop::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: 30px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent-ice);
+}
+.about-page .ab-stop-year {
+  position: absolute;
+  left: -186px;
+  top: 20px;
+  width: 130px;
+  text-align: right;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.02rem;
+  color: var(--accent-ice);
+}
+.about-page .ab-stop h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1.06rem;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+}
+.about-page .ab-stop p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Scene 8: proof (the one background shift) */
+.about-page .ab-proof {
+  background: linear-gradient(165deg, #0b1a38 0%, #060d1f 100%);
+}
+.about-page .ab-proof-row {
+  display: flex;
+  align-items: baseline;
+  gap: 28px;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+.about-page .ab-proof-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.08rem;
+  color: var(--text-primary);
+  margin: 0;
+  flex: 0 1 320px;
+}
+.about-page .ab-proof-line {
+  color: var(--text-secondary);
+  font-size: 1.02rem;
+  margin: 0;
+}
+.about-page .ab-proof .honours-grid {
+  margin: 44px 0 8px;
+}
+.about-page .ab-press {
+  margin-top: 52px;
+}
+.about-page .ab-press-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  margin: 0 0 16px;
+}
+.about-page .ab-press-item {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 10px 0;
+  flex-wrap: wrap;
+}
+.about-page .ab-press-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--accent-ice);
+  flex: 0 1 220px;
+}
+.about-page .ab-press-line {
+  color: var(--text-secondary);
+}
+
+/* Scene 9: quiet line */
+.about-page .ab-quiet {
+  text-align: center;
+  font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--text-primary);
+  max-width: 660px;
+  margin: 0 auto;
+}
+
+/* Scene 10: talk + map */
+.about-page .ab-talk-title {
+  margin-bottom: 44px;
+}
+.about-page .ab-doors {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+}
+.about-page .ab-door {
+  display: block;
+}
+.about-page .ab-door-label {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.about-page .ab-door-detail {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  transition: color 0.25s ease;
+}
+.about-page .ab-door:hover .ab-door-detail {
+  color: var(--accent-cyan);
+}
+.about-page .ab-exit {
+  margin: 52px 0 0;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  max-width: 640px;
+}
+.about-page .ab-exit a {
+  color: var(--accent-ice);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.about-page .ab-exit a:hover {
+  color: var(--accent-cyan);
+}
+.about-page .ab-index {
+  margin-top: 34px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+}
+.about-page .ab-index a {
+  color: var(--text-muted);
+  font-size: 0.94rem;
+  transition: color 0.25s ease;
+}
+.about-page .ab-index a:hover {
+  color: var(--accent-cyan);
+}
+
+/* About responsive */
+@media (max-width: 900px) {
+  .about-page .ab-scene { padding: 44px 0; }
+  .about-page .ab-hero { padding-top: 4px; }
+  .about-page .ab-hero-grid { grid-template-columns: 1fr; gap: 30px; }
+  .about-page .ab-hero-media { order: -1; }
+  .about-page .ab-worlds-grid { grid-template-columns: 1fr; gap: 44px; }
+  .about-page .ab-tiles { grid-template-columns: 1fr; gap: 30px; }
+  .about-page .ab-trainer-grid { grid-template-columns: 1fr; gap: 28px; }
+  .about-page .ab-doors { grid-template-columns: 1fr 1fr; gap: 26px; }
+  .about-page .ab-row { flex-wrap: wrap; }
+  .about-page .ab-row-link { margin-left: 78px; }
+}
+@media (max-width: 560px) {
+  .about-page .ab-road { margin-left: 14px; }
+  .about-page .ab-stop { padding: 16px 0 16px 22px; }
+  .about-page .ab-stop-year { position: static; width: auto; text-align: left; display: block; margin-bottom: 5px; }
+  .about-page .ab-proof-name { flex-basis: 100%; }
+  .about-page .ab-press-name { flex-basis: 100%; }
+  .about-page .ab-press-item { gap: 4px; }
+}
+
+/* About proof scene: honour photos as plain photos, not glass cards */
+.about-page .ab-proof .honour {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+.about-page .ab-proof .honour img {
+  border-radius: 16px;
+}
+.about-page .ab-proof .honour figcaption {
+  padding: 12px 2px 0;
+}
+
+/* About phone tightening: keep the storyboard near 8 screens */
+@media (max-width: 900px) {
+  .about-page .ab-scene { padding: 36px 0; }
+  .about-page .ab-rows { gap: 40px; }
+  .about-page .ab-proof-row { padding: 14px 0; }
+  .about-page .ab-proof .honours-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .about-page .ab-proof .honour img { height: 190px; }
+}
+
+/* About build rows on phone: grid so icon, text and link never scatter */
+@media (max-width: 900px) {
+  .about-page .ab-row {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    column-gap: 22px;
+    row-gap: 10px;
+    align-items: start;
+  }
+  .about-page .ab-row-icon { grid-row: 1 / span 2; }
+  .about-page .ab-row-main { grid-column: 2; }
+  .about-page .ab-row-link { grid-column: 2; margin-left: 0; justify-self: start; }
+}
+
+/* ==========================================================================
+   STEP 2 SYNC (2026-11-15): one master timeline drives the film, the
+   texts and the cards. Two supports live here:
+   1) When main.js has built the master timeline it adds body.sync-on and
+      the bands' own CSS scroll-driven animations (a separate clock) are
+      switched off; the timeline animates the same pieces instead.
+   2) On desktop the story scene becomes a tall sticky scene, mirroring
+      the phone layout: the text block stays framed on the right while
+      the film plays behind it, and the lines advance on the film's clock
+      only while the character is back on the left (main.js enforces the
+      beat windows). The chapter strip rides at the foot of the stuck
+      frame instead of hanging below the content.
+   ========================================================================== */
+body.sync-on .band-media,
+body.sync-on .band-media img,
+body.sync-on .band-rise {
+  animation: none !important;
+}
+
+@media (min-width: 768px) {
+  .story-scene {
+    display: block;
+    min-height: 260vh;
+    padding: 0 8%;
+  }
+
+  .story-scene .scene-inner {
+    height: 260vh;
+  }
+
+  .story-content {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    align-items: center;
+  }
+
+  .chapter-strip {
+    bottom: 24px;
+  }
 }

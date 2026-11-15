@@ -1,5 +1,5 @@
 /* ==========================================================================
-   INNER PAGES — extends style.css design system
+   INNER PAGES - extends style.css design system
    Same navy glassmorphism, page-hero + content sections
    ========================================================================== */
 
@@ -362,21 +362,169 @@
 }
 
 /* ==========================================================================
-   CALENDLY EMBED (coffee.html)
-   The booking iframe is always light, so give it a clean rounded frame
-   instead of letting it sit raw inside the dark mug card.
+   UPGRADE ADDITIONS (2026-11-09) - same tokens, no new design direction
+   Skill tags, status lines, credit notes, titled facts, stacked media
    ========================================================================== */
-.calendly-inline-widget {
-  background: #ffffff;
-  border-radius: 14px;
+
+/* Skill / tech tags inside cards */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.tag {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent-ice);
+  background: rgba(56, 189, 248, 0.10);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 999px;
+  padding: 5px 10px;
+  line-height: 1.2;
+}
+
+/* Small status line above a card title (e.g. Working demo, In development) */
+.card-status {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  margin-bottom: 2px;
+}
+
+/* Honest credit / authorship note under a build */
+.credit-note {
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+  border-left: 2px solid rgba(56, 189, 248, 0.45);
+  padding-left: 14px;
+  margin: 18px 0 6px;
+}
+
+.credit-note strong {
+  color: var(--text-secondary);
+}
+
+/* Fact card with a text title instead of a big number */
+.fact .fact-title {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 6px;
+  line-height: 1.35;
+}
+
+/* Stacked figures in a split-media column (e.g. demo screenshots) */
+.media-stack figure {
+  margin: 0 0 16px;
+}
+
+.media-stack figure:last-child {
+  margin-bottom: 0;
+}
+
+.media-stack figcaption {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* Plain list inside split copy */
+.plain-list {
+  margin: 0 0 16px;
+  padding-left: 18px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  font-size: 1.02rem;
+}
+
+.plain-list li {
+  margin-bottom: 6px;
+}
+
+.plain-list strong {
+  color: var(--text-primary);
+}
+
+/* About hub additions (Part 3-6 pass): honours strip + work index.
+   Photos use focal-aware cover crops so faces are never cut on phones. */
+.honours-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.honour {
+  margin: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.85);
+  background: var(--glass-bg);
 }
 
-.calendly-inline-widget iframe {
-  border-radius: 14px;
+.honour img {
+  width: 100%;
+  height: 340px;
+  object-fit: cover;
+  display: block;
 }
 
-@media (max-width: 620px) {
-  .calendly-inline-widget { height: 680px !important; }
+.honour--medal img { object-position: 50% 16%; }
+.honour--cert img { object-position: 28% 20%; }
+
+.honour figcaption {
+  padding: 14px 18px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 767.98px) {
+  .honours-grid { grid-template-columns: 1fr; }
+  .honour img { height: 300px; }
+}
+
+.work-index {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 28px;
+}
+
+.work-index a {
+  padding: 13px 2px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  text-decoration: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: color 0.25s;
+}
+
+.work-index a::after {
+  content: "\2192";
+  color: var(--accent-cyan);
+}
+
+.work-index a:hover { color: #ffffff; }
+
+@media (max-width: 767.98px) {
+  .work-index { grid-template-columns: 1fr; }
+}
+
+/* Calendly embed (Coffee page): the widget container sits on the site navy
+   so there is no white box or white flash around the embed while it loads. */
+.calendly-inline-widget {
+  background: #060b18;
 }

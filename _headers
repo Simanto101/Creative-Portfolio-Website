@@ -1,0 +1,5 @@
+/frames-desktop/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/frames-mobile/*
+  Cache-Control: public, max-age=31536000, immutable
