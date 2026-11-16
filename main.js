@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const footerEl = document.getElementById('footer-section');
   const DARK = '#060b18';
   const MOBILE_FRAME_W = 828;
+  const DESKTOP_FRAME_W = 1920;
 
   const isPortraitViewport = () => window.innerHeight > window.innerWidth;
   let frameDir = isPortraitViewport() ? './frames-mobile' : './frames-desktop';
@@ -76,12 +77,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // lookahead. Last resort: the plain drawImage path (unchanged behaviour).
   // The film itself (images, mapping, timing) is never touched by this pipeline.
   // =========================================================================
-  const DECODE_BEHIND_DESKTOP = 10, DECODE_AHEAD_DESKTOP = 60;
+  // Crash fix (2026-11-16): the desktop decode footprint is bounded hard.
+  // The Step 1 values (10 behind / 60 ahead = 71 bitmaps, 5 concurrent
+  // decodes, an 80-frame warm decode() pass and a full-density crossing
+  // decode() pass) kept roughly 0.6 to 1.4 GB of decoded raster alive on a
+  // desktop GPU and crashed Chrome's renderer (STATUS_ACCESS_VIOLATION) on
+  // an Intel Iris Xe laptop. The window is now 6 behind / 16 ahead (23
+  // bitmaps, about 190 MB worst case at a 1920x1080 canvas), 2 concurrent
+  // decodes, and the warm and crossing blanket decode() passes are gone:
+  // only the live window is ever decoded.
+  const DECODE_BEHIND_DESKTOP = 6, DECODE_AHEAD_DESKTOP = 16;
   // Perf pass (Cause 3): the mobile bitmap window shrinks to 4 behind / 8
   // ahead (~79 MB of decoded raster instead of ~152 MB), so browser evictions
-  // stop forcing re-decodes at the playhead. Desktop values unchanged.
+  // stop forcing re-decodes at the playhead.
   const DECODE_BEHIND_MOBILE = 4, DECODE_AHEAD_MOBILE = 8;
-  const MAX_DECODE_ACTIVE = 5;
+  const MAX_DECODE_ACTIVE = 2;
   const bitmaps = new Map();       // idx -> ImageBitmap (playhead window only)
   const imgDecoded = new Set();    // idx whose raster is decoded (bitmap or decode())
   const decodeQueued = new Set();  // idx with a decode job in flight
@@ -181,33 +191,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (d < bestD) { bestD = d; best = i; }
     }
     if (best >= 0) return { idx: best, bitmap: bitmapSupported };
-    // 2) Crossing segment: decode() every frame at full density, ahead of arrival,
-    //    until the playhead has passed the end of the crossing. DESKTOP ONLY
-    //    (perf pass, Cause 3): on mobile this pass pushed 132 rasters (~800 MB)
-    //    the browser cannot hold, so evictions forced re-decodes at the
-    //    playhead; mobile now decodes only the live window in step 1.
-    const [ca, cb] = crossingRange();
-    if (frameDir.indexOf('mobile') === -1 && playheadIdx <= cb) {
-      best = -1; bestD = Infinity;
-      for (let i = ca; i <= cb; i++) {
-        if (!loadedIndices.has(i) || decodeQueued.has(i) || imgDecoded.has(i)) continue;
-        const d = Math.abs(i - playheadIdx);
-        if (d < bestD) { bestD = d; best = i; }
-      }
-      if (best >= 0) return { idx: best, bitmap: false };
-    }
-    // 3) Warm pass (Step 1): decode() — never bitmaps — the loaded frames
-    //    further ahead of the bitmap window, nearest first. This is what the
-    //    idle-time pump spends its spare slots on, so a fast scroll finds
-    //    the road ahead already decoded instead of paying decode at draw.
-    const warmAhead = frameDir.indexOf('mobile') !== -1 ? 40 : 80;
-    best = -1; bestD = Infinity;
-    for (let i = playheadIdx + 1; i <= Math.min(TOTAL_FRAMES - 1, playheadIdx + warmAhead); i++) {
-      if (!loadedIndices.has(i) || decodeQueued.has(i) || imgDecoded.has(i)) continue;
-      const d = i - playheadIdx;
-      if (d < bestD) { bestD = d; best = i; }
-    }
-    if (best >= 0) return { idx: best, bitmap: false };
+    // Crash fix (2026-11-16): the former step 2 (decode() every crossing
+    // frame at full density, 96 frames, about 800 MB of raster) and step 3
+    // (warm pass, decode() up to 80 frames ahead of the window) are
+    // removed. Together they force-decoded far more full-res raster than
+    // the draw path can ever need; the bounded window in step 1 is the
+    // whole decode strategy now. (crossingRange() above is left in place
+    // but no longer called.)
     return null;
   }
   function pumpDecodes() {
@@ -232,16 +222,28 @@ document.addEventListener('DOMContentLoaded', () => {
         bitmaps.delete(idx);
       }
     });
+    // Crash fix (2026-11-16): release the <img> elements themselves far
+    // from the playhead, so the browser can reclaim their decoded rasters
+    // instead of holding all 193 frames for the life of the page. The
+    // rolling loader refetches an evicted frame when the playhead comes
+    // back within its fetch window (frames are about 27 KB and served
+    // with an ETag, so a refetch is a cache hit or a 304). Frame 0, the
+    // hero, is never evicted.
+    const RETAIN_BEHIND = 40, RETAIN_AHEAD = 80;
+    loadedIndices.forEach((idx) => {
+      if (idx !== 0 && (idx < playheadIdx - RETAIN_BEHIND || idx > playheadIdx + RETAIN_AHEAD)) {
+        frameImages[idx] = null;
+        loadedIndices.delete(idx);
+        imgDecoded.delete(idx);
+      }
+    });
     pumpDecodes();
   }
 
-  // Idle-time decoding (Step 1): when the main thread is free, keep the
-  // decode pump fed so the warm pass above pre-decodes ahead of the
-  // playhead even while the page sits still.
-  if ('requestIdleCallback' in window) {
-    const idlePump = () => { pumpDecodes(); requestIdleCallback(idlePump, { timeout: 1500 }); };
-    requestIdleCallback(idlePump, { timeout: 1500 });
-  }
+  // Crash fix (2026-11-16): the Step 1 idle-time decode pump is removed.
+  // It existed to feed the warm pass; with that pass gone, pumpDecodes is
+  // driven by loads, decode completions and playhead moves only, so an
+  // idle page does zero decode work and holds no warm raster pool.
 
   let lastCanvasW = 0;
   let lastCanvasH = 0;
@@ -263,6 +265,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     // Portrait viewports: never allocate a canvas bigger than the source frame (sharp + cheaper to fill)
     if (portraitNow) dpr = Math.min(dpr, MOBILE_FRAME_W / window.innerWidth);
+    // Crash fix (2026-11-16): the same source cap for landscape. The
+    // desktop frames are 1920 px wide, so a wider canvas only upscales,
+    // yet at DPR 1.5 on a 1920 px screen it allocated a 2880x1620 canvas
+    // and 2880x1620 bitmaps (about 18.7 MB each). The cap keeps every
+    // canvas and bitmap at or under the frame's own 1920x1080 (8.3 MB),
+    // and no real detail is lost: the source has no more to give.
+    else dpr = Math.min(dpr, DESKTOP_FRAME_W / window.innerWidth);
     canvas.width = Math.round(window.innerWidth * dpr);
     canvas.height = Math.round(window.innerHeight * dpr);
     lastCanvasW = window.innerWidth;
@@ -294,13 +303,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Progressive loading: frame 1 first (instant hero), then everything else
   // starts IMMEDIATELY (Step 1: the old window-load gates are gone, so the
-  // playhead can no longer outrun a loader that has not started). Desktop
-  // fetches the whole film in a sparse order (every 8th frame, then every
-  // 4th, then fill the gaps) at concurrency 8, so the whole journey is
-  // coarsely scrubbable early. Mobile (perf pass, Cause 1) loads by
-  // DISTANCE TO THE PLAYHEAD instead: a rolling window +80 ahead of the
-  // playhead (Step 1, widened from +40), so the first scroll no longer
-  // competes with a 4.63 MB download + decode storm.
+  // playhead can no longer outrun a loader that has not started). Both sets
+  // now load by DISTANCE TO THE PLAYHEAD (crash fix, 2026-11-16: desktop
+  // adopted the mobile pattern; its old fetch-everything sparse loader at
+  // concurrency 8 is gone). Mobile window: +80 ahead of the playhead
+  // (Step 1, widened from +40). Desktop window: +64 ahead, 16 behind.
   // adopt=true is the rotation cut-over: the incoming set's preloaded
   // frames (pendingSwap) are kept and the loader only tops up the rest.
   function startLoading(adopt) {
@@ -390,23 +397,63 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // ---- Desktop loader (Step 1): sparse pass, then fill, all immediate ----
-    loaderNudge = null;
-    const order = [];
-    const seen = new Set([0]);
-    for (let i = 8; i < TOTAL_FRAMES; i += 8) { order.push(i); seen.add(i); }
-    for (let i = 4; i < TOTAL_FRAMES; i += 4) if (!seen.has(i)) { order.push(i); seen.add(i); }
-    for (let i = 1; i < TOTAL_FRAMES; i++) if (!seen.has(i)) { order.push(i); seen.add(i); }
-    let next = 0;
-    const CONCURRENCY = 8;
-    const pump = () => {
-      if (token !== loadToken || next >= order.length) return;
-      loadOne(order[next++], pump);
+    // ---- Desktop loader (crash fix, 2026-11-16): rolling window ----
+    // The Step 1 desktop loader fetched ALL 193 frames up front at
+    // concurrency 8 and held every <img> for the life of the page, which
+    // is what let the decode passes build a multi-hundred-MB raster pool.
+    // Desktop now uses the same distance-to-playhead pattern as mobile:
+    // only frames near the playhead are fetched, the window rolls with
+    // the playhead (loaderNudge), frames far behind are released by the
+    // eviction in updateDecodeWindow, and an evicted frame is refetched
+    // when the playhead returns to it.
+    const FETCH_AHEAD_D = 64;   // frames fetched ahead of the playhead
+    const FETCH_BEHIND_D = 16;  // small look-behind, so a step back is instant
+    const inFlightD = new Set();
+    let activeLoadsD = 0;
+    let userScrollingD = false;
+    let scrollIdleTimerD = 0;
+    let pumpsStartedD = false;
+    const connD = navigator.connection || null;
+    const slowLinkD = () => !!connD && (connD.saveData
+      || connD.effectiveType === 'slow-2g' || connD.effectiveType === '2g');
+    // While the user is actively scrolling, fetching yields the network:
+    // concurrency drops 6 -> 3 and is restored when the scroll rests.
+    const concurrencyD = () => (slowLinkD() ? 2 : (userScrollingD ? 3 : 6));
+    const nextIndexD = () => {
+      const ahead = slowLinkD() ? 16 : FETCH_AHEAD_D;
+      const lo = Math.max(0, playheadIdx - FETCH_BEHIND_D);
+      const hi = Math.min(TOTAL_FRAMES - 1, playheadIdx + ahead);
+      let best = -1, bestD = Infinity;
+      for (let i = lo; i <= hi; i++) {
+        if (loadedIndices.has(i) || inFlightD.has(i)) continue;
+        const d = i < playheadIdx ? (playheadIdx - i) * 2 : (i - playheadIdx);
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      return best;
     };
-    const startPumps = () => { for (let c = 0; c < CONCURRENCY; c++) pump(); };
-    // Frame 1 first (instant hero); the moment it lands, the fill begins —
-    // no window-load gate, no 300 ms wait (Step 1 fetch guarantee).
-    loadOne(0, () => startPumps());
+    const pumpD = () => {
+      if (token !== loadToken || !pumpsStartedD) return;
+      while (activeLoadsD < concurrencyD()) {
+        const idx = nextIndexD();
+        if (idx < 0) return;
+        inFlightD.add(idx);
+        activeLoadsD++;
+        loadOne(idx, () => { activeLoadsD--; inFlightD.delete(idx); pumpD(); });
+      }
+    };
+    loaderNudge = pumpD; // updateDecodeWindow re-pumps as the playhead moves
+    const onScrollActivityD = () => {
+      if (token !== loadToken) { window.removeEventListener('scroll', onScrollActivityD); return; }
+      userScrollingD = true;
+      clearTimeout(scrollIdleTimerD);
+      scrollIdleTimerD = setTimeout(() => { userScrollingD = false; pumpD(); }, 180);
+    };
+    window.addEventListener('scroll', onScrollActivityD, { passive: true });
+    if (connD && connD.addEventListener) connD.addEventListener('change', pumpD);
+    const startPumpsD = () => { pumpsStartedD = true; pumpD(); };
+    // Frame 1 first (instant hero); the window fill begins the moment it
+    // lands, same as mobile.
+    loadOne(0, () => startPumpsD());
   }
   startLoading();
 
@@ -424,6 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
       images: new Array(TOTAL_FRAMES),
       loaded: new Set(),
       decoded: new Set(),
+      kicked: new Set(),
       inFlight: 0
     };
     pendingSwap = state;
@@ -450,8 +498,16 @@ document.addEventListener('DOMContentLoaded', () => {
           state.inFlight--;
           state.images[idx] = img;
           state.loaded.add(idx);
+          // Crash fix (2026-11-16): the swap preload used to decode()
+          // EVERY incoming frame as it loaded (another 193 full-res
+          // rasters, about 1.6 GB of demand). Only the window around the
+          // on-screen frame is decoded here, which is all the cut-over
+          // check needs; the rest decode through the normal bounded
+          // pipeline after adoption.
           const mark = () => { state.decoded.add(idx); if (idx === matchIdx) frameSetDirty = true; };
-          if (img.decode) img.decode().then(mark, mark); else mark();
+          if (Math.abs(idx - matchIdx) <= 12) {
+            if (img.decode) img.decode().then(mark, mark); else mark();
+          }
           pump();
         };
         img.onerror = () => { state.inFlight--; pump(); };
@@ -591,6 +647,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let exactFrame = filmMobile
       ? mobileFrameFromY(smoothY)
       : desktopFrameFromProgress(clamp01(smoothProgress));
+
+    // Crash fix (2026-11-16): if the on-screen frame is loaded in the
+    // incoming set but sits outside the swap's pre-decoded window (the
+    // playhead moved during the preload), decode just that one frame so
+    // the cut-over below can still proceed.
+    if (pendingSwap) {
+      const curSwapIdx = Math.round(Math.min(TOTAL_FRAMES - 1, Math.max(0, exactFrame)));
+      const swapImg = pendingSwap.images[curSwapIdx];
+      if (swapImg && pendingSwap.loaded.has(curSwapIdx)
+        && !pendingSwap.decoded.has(curSwapIdx) && !pendingSwap.kicked.has(curSwapIdx)) {
+        pendingSwap.kicked.add(curSwapIdx);
+        const st = pendingSwap;
+        const markSwap = () => { st.decoded.add(curSwapIdx); if (pendingSwap === st) frameSetDirty = true; };
+        if (swapImg.decode) swapImg.decode().then(markSwap, markSwap); else markSwap();
+      }
+    }
 
     // Rotation cut-over (Step 1): switch sets only once the incoming set
     // can show the frame currently on screen; until then this render keeps
